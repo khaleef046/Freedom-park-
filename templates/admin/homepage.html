@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Homepage & Gallery — Freedom Park{% endblock %}
+{% block content %}
+<div class="container section dashboard-shell">
+  <header class="dashboard-hero">
+    <div>
+      <span class="section-tag">PUBLIC WEBSITE</span>
+      <h1>Homepage &amp; Gallery</h1>
+      <p>Edit the public hero presentation without changing application source code.</p>
+    </div>
+    <a href="{{ url_for('public.index') }}" target="_blank" rel="noopener" class="btn btn-outline">View Homepage ↗</a>
+  </header>
+
+  <form method="POST" class="card homepage-editor-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2>Hero &amp; Brand</h2>
+    <p class="form-hint" style="margin-bottom:1.5rem;">Keep the wording simple and local-friendly. The small line under Freedom Park is your park's official identity line.</p>
+
+    <div class="form-group">
+      <label class="form-label" for="brand_subtitle">Brand line under Freedom Park</label>
+      <input class="form-control" id="brand_subtitle" name="brand_subtitle" value="{{ homepage.brand_subtitle or '' }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="hero_kicker">Small hero line</label>
+      <input class="form-control" id="hero_kicker" name="hero_kicker" value="{{ homepage.hero_kicker or '' }}">
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label" for="hero_title_line1">Main heading — line 1</label><input class="form-control" id="hero_title_line1" name="hero_title_line1" value="{{ homepage.hero_title_line1 or '' }}"></div>
+      <div class="form-group"><label class="form-label" for="hero_title_line2">Main heading — highlighted line</label><input class="form-control" id="hero_title_line2" name="hero_title_line2" value="{{ homepage.hero_title_line2 or '' }}"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="hero_subtitle">Hero supporting text</label>
+      <textarea class="form-control" id="hero_subtitle" name="hero_subtitle" rows="3">{{ homepage.hero_subtitle or '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="hero_background_path">Hero background image path / URL</label>
+      <input class="form-control" id="hero_background_path" name="hero_background_path" value="{{ homepage.hero_background_path or '' }}">
+      <div class="form-hint">Temporary V4 design placeholder is included. Replace it with the real Freedom Park photo before public launch.</div>
+    </div>
+
+    <hr style="border:0;border-top:1px solid var(--color-border);margin:2rem 0;">
+    <h2>Homepage Gallery</h2>
+    <div class="form-group"><label class="form-label" for="gallery_heading">Gallery heading</label><input class="form-control" id="gallery_heading" name="gallery_heading" value="{{ homepage.gallery_heading or '' }}"></div>
+    <div class="form-group"><label class="form-label" for="gallery_subtitle">Gallery description</label><textarea class="form-control" id="gallery_subtitle" name="gallery_subtitle" rows="2">{{ homepage.gallery_subtitle or '' }}</textarea></div>
+
+    <div class="homepage-editor-actions">
+      <button class="btn btn-primary btn-lg" type="submit">Save Homepage Changes</button>
+      <a class="btn btn-secondary" href="{{ url_for('content_bp.dashboard', type='gallery') }}">Manage Gallery Photos</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

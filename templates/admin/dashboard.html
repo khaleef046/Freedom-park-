@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Owner Command Center — Freedom Park{% endblock %}
+{% block content %}
+<div class="container section dashboard-shell">
+  <header class="dashboard-hero">
+    <div><span class="section-tag">BUSINESS COMMAND CENTER</span><h1>Owner Dashboard</h1><p>Run today's park operations and manage the business from one place.</p></div>
+    <div class="dashboard-identity"><strong>{{ current_user.full_name }}</strong><span>Founder &amp; Owner</span></div>
+  </header>
+  {% if pending_cancellations or pending_complaints or equipment_incidents or pending_commissions %}
+  <section class="attention-panel"><div><strong>Business attention</strong><span>Review these items</span></div><div class="attention-actions">{% if pending_cancellations %}<a href="{{ url_for('admin.cancellations_list') }}">{{ pending_cancellations }} cancellations</a>{% endif %}{% if pending_complaints %}<a href="{{ url_for('admin.complaints') }}">{{ pending_complaints }} complaints</a>{% endif %}{% if equipment_incidents %}<a href="{{ url_for('admin.equipment_reports') }}">{{ equipment_incidents }} equipment reports</a>{% endif %}</div></section>{% endif %}
+  <section class="today-strip"><div><span class="section-tag">TODAY</span><h2>{% if today_booking %}{{ today_booking.customer_name }}{% else %}No booking today{% endif %}</h2><p>{% if today_booking %}{{ today_booking.booking_uid }} · {{ today_booking.num_people }} guests · 8 AM – 8 PM{% else %}The date is currently available.{% endif %}</p></div><a href="{{ url_for('admin.manual_booking') }}{% if not today_booking %}?date={{ today.isoformat() }}{% endif %}" class="btn btn-primary">{% if today_booking %}View bookings{% else %}+ Manual booking{% endif %}</a></section>
+  <section class="task-section"><div class="task-section-heading"><div><span class="section-tag">BUSINESS RESPONSIBILITIES</span><h2>What needs your attention?</h2></div></div><div class="task-grid">
+    <a class="task-card task-primary" href="{{ url_for('admin.bookings') }}"><span class="task-icon">📋</span><div><h3>Bookings</h3><p>Manage customer reservations and status.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.calendar_view') }}"><span class="task-icon">📅</span><div><h3>Calendar</h3><p>Check availability and locked dates.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.manual_booking') }}"><span class="task-icon">☎️</span><div><h3>Phone / WhatsApp Booking</h3><p>Enter a booking received outside the website.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.cancellations_list') }}"><span class="task-icon">↩️</span><div><h3>Refunds &amp; Cancellations</h3><p>Review requests and process cancellations.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.staff_management') }}"><span class="task-icon">👥</span><div><h3>Staff</h3><p>Manage staff accounts and access.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.equipment_reports') }}"><span class="task-icon">🛡️</span><div><h3>Operations</h3><p>Review equipment incidents and gate operations.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.notifications_view') }}"><span class="task-icon">🔔</span><div><h3>Notifications</h3><p>See new bookings, complaints and operational alerts.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.pricing') }}"><span class="task-icon">💰</span><div><h3>Pricing</h3><p>Update the park's day rates.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.reports') }}"><span class="task-icon">📊</span><div><h3>Reports &amp; Analytics</h3><p>Review booking trends, sources and revenue.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.homepage_editor') }}"><span class="task-icon">🌿</span><div><h3>Homepage &amp; Gallery</h3><p>Edit hero text, brand line and homepage gallery presentation.</p></div><span class="task-arrow">→</span></a>
+  </div></section>
+  <section class="quick-status"><div><span>Confirmed bookings</span><strong>{{ total_bookings }}</strong></div><div><span>Cancelled</span><strong>{{ total_cancelled }}</strong></div><div><span>Revenue</span><strong>{{ format_currency(total_revenue) }}</strong></div><div><span>Next booking</span><strong>{% if next_booking %}{{ format_date_long(next_booking.booking_date) }}{% else %}None{% endif %}</strong></div></section>
+  {% if current_user.has_permission("CONTENT_MANAGEMENT") %}<section class="content-access"><a href="{{ url_for('content_bp.dashboard') }}"><span class="content-mark">✦</span><div><strong>Content Management</strong><small>Website gallery, activities, facilities and announcements</small></div><span>→</span></a></section>{% endif %}
+</div>
+{% endblock %}

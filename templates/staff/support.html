@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Partner Support — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 680px;">
+  <div style="margin-bottom: var(--space-xl);">
+    <span class="section-tag">Internal Support</span>
+    <h1>Staff Partner Support</h1>
+    <p style="color: var(--color-text-muted);">
+      Submit questions, commission queries, or website feedback directly to the Park Owner.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-2xl);">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Submit New Request</h3>
+    <form method="POST" action="{{ url_for('staff.support') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="category" class="form-label">Category</label>
+        <select id="category" name="category" class="form-select" required>
+          <option value="Commission Query">Commission Query</option>
+          <option value="Customer Issue">Customer Inquiry / Booking Issue</option>
+          <option value="Website Problem">Website or System Problem</option>
+          <option value="Suggestion">Business Suggestion</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="message" class="form-label">Message Details</label>
+        <textarea id="message" name="message" class="form-control" rows="4" required placeholder="Describe your inquiry..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Submit to Administration</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">My Previous Requests</h3>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Message</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+            <tr>
+              <td>{{ t.created_at.strftime('%b %d') }}</td>
+              <td><strong>{{ t.category }}</strong></td>
+              <td style="max-width: 250px;">{{ t.message }}</td>
+              <td>
+                <span class="badge {% if t.status == 'RESOLVED' %}badge-success{% else %}badge-warning{% endif %}">
+                  {{ t.status }}
+                </span>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 1.5rem;">
+                No support tickets filed.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

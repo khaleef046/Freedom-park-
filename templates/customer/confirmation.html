@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 640px;">
+  <!-- Progress Stepper (5 Steps) -->
+  <div class="booking-stepper">
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Date</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Details</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Review</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Payment</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-active">
+      <span class="step-num">5</span>
+      <span class="step-label">Confirmed</span>
+    </div>
+  </div>
+
+  <div class="card" style="text-align: center; box-shadow: var(--shadow-md); padding: var(--space-2xl);">
+    <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🎉</div>
+    <span class="badge badge-success" style="font-size: 0.9rem; padding: 0.4rem 1rem; margin-bottom: 1rem;">
+      BOOKING CONFIRMED &bull; DATE LOCKED
+    </span>
+
+    <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">We Look Forward to Welcoming You!</h1>
+    <p style="color: var(--color-text-muted); font-size: 0.95rem;">
+      Your private booking at Freedom Park is locked. No one else can book this date.
+    </p>
+
+    <!-- Pass Preview Box -->
+    <div style="border: 2px dashed rgba(27, 67, 50, 0.25); border-radius: var(--radius-lg); padding: 1.5rem; margin: 1.5rem 0; background-color: var(--color-surface-alt);">
+      <div style="font-size: 0.85rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700;">
+        Unique Booking Reference:
+      </div>
+      <div style="font-family: var(--font-family-mono); font-size: 1.6rem; font-weight: 800; color: var(--color-primary); margin: 0.25rem 0 1rem 0;">
+        {{ booking.booking_uid }}
+      </div>
+
+      <!-- QR Code -->
+      <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+        {% if qr_data_uri %}
+          <img src="{{ qr_data_uri }}" alt="Booking QR Code Pass" style="width: 180px; height: 180px; border-radius: 8px; background: #fff; padding: 6px; box-shadow: var(--shadow-xs);">
+        {% endif %}
+      </div>
+      <small style="color: var(--color-text-muted);">Show this QR pass at the security gate in Pernambut upon arrival.</small>
+
+      <div style="text-align: left; margin-top: 1.5rem; font-size: 0.92rem; border-top: 1px solid var(--color-border); padding-top: 1rem;">
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Date:</span>
+          <span class="pass-meta-val">{{ format_date_long(booking.booking_date) }}</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Timings:</span>
+          <span class="pass-meta-val">8:00 AM – 8:00 PM</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Capacity:</span>
+          <span class="pass-meta-val">Up to {{ booking.num_people }} People</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Total Amount Paid:</span>
+          <span class="pass-meta-val" style="color: var(--color-primary);">{{ format_currency(booking.amount) }} (Verified)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background-color: var(--color-primary-soft); padding: 0.85rem; border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-primary); margin-bottom: 1.5rem;">
+      💬 WhatsApp confirmation summary dispatched to <strong>+91 {{ booking.customer_phone }}</strong>
+    </div>
+
+    <div style="display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('customer.digital_pass', booking_uid=booking.booking_uid) }}" class="btn btn-primary btn-lg">
+        Open Digital Pass 🎟️
+      </a>
+      <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary btn-lg">
+        Go to My Bookings
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

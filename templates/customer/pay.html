@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout & Payment — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 680px;">
+  <!-- Progress Stepper (5 Steps) -->
+  <div class="booking-stepper">
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Date</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Details</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-done">
+      <span class="step-num">✓</span>
+      <span class="step-label">Review</span>
+    </div>
+    <div class="step-line step-line-done"></div>
+    <div class="step-item step-active">
+      <span class="step-num">4</span>
+      <span class="step-label">Payment</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <span class="step-num">5</span>
+      <span class="step-label">Confirmed</span>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-tag">Step 4 of 5</span>
+    <h1>Payment &amp; Finalization</h1>
+    <p style="color: var(--color-text-muted);">
+      Confirm your booking to lock the date and generate your digital QR entry pass.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl); box-shadow: var(--shadow-md);">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <h3 style="margin: 0; color: var(--color-primary);">Freedom Park Private Pass</h3>
+        <span style="font-size: 0.85rem; color: var(--color-text-muted);">Pernambut, India</span>
+      </div>
+      <span class="badge badge-warning">Awaiting Payment</span>
+    </div>
+
+    <!-- Summary Details Table -->
+    <div style="display: grid; gap: 0.75rem; font-size: 0.95rem; margin-bottom: 1.5rem;">
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Booking Reference:</span>
+        <span class="pass-meta-val" style="font-family: var(--font-family-mono);">{{ booking.booking_uid }}</span>
+      </div>
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Reserved Date:</span>
+        <span class="pass-meta-val">{{ format_date_long(booking.booking_date) }}</span>
+      </div>
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Operating Hours:</span>
+        <span class="pass-meta-val">8:00 AM – 8:00 PM (12 Hours Exclusive)</span>
+      </div>
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Guest Limit:</span>
+        <span class="pass-meta-val">Up to {{ booking.num_people }} People</span>
+      </div>
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Primary Guest:</span>
+        <span class="pass-meta-val">{{ booking.customer_name }}</span>
+      </div>
+      <div class="pass-meta-row">
+        <span class="pass-meta-label">Contact Mobile:</span>
+        <span class="pass-meta-val">+91 {{ booking.customer_phone }}</span>
+      </div>
+      <div class="pass-meta-row" style="border: none; padding-top: 1rem; font-size: 1.15rem;">
+        <span class="pass-meta-label" style="font-weight: 700; color: var(--color-text-main);">Total Payable:</span>
+        <span class="pass-meta-val" style="font-size: 1.6rem; color: var(--color-primary); font-weight: 800;">
+          {{ format_currency(booking.amount) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Prominently Displayed Cancellation Policy -->
+    <div style="background-color: var(--color-primary-soft); border-left: 4px solid var(--color-primary); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+      <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem; font-size: 0.95rem;">
+        Cancellation Policy (Please Read Carefully):
+      </div>
+      <p style="font-size: 0.88rem; color: var(--color-text-main); line-height: 1.5; margin: 0;">
+        {{ policy_text }}
+      </p>
+    </div>
+
+    <!-- Development Sandbox Payment Notice -->
+    <div style="background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 0.85rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.85rem; color: #92400E;">
+      🛡️ <strong>DEVELOPMENT SANDBOX MODE:</strong> No real money will be processed. Choose an action below to simulate a real payment gateway response.
+    </div>
+
+    <!-- Payment Simulation Actions -->
+    <form method="POST" action="{{ url_for('customer.pay', booking_uid=booking.booking_uid) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+        <button type="submit" name="action" value="pay_success" class="btn btn-primary btn-lg" style="flex: 2; min-width: 240px; font-weight: 700;">
+          Simulate Successful Payment &rarr;
+        </button>
+        <button type="submit" name="action" value="pay_cancel" class="btn btn-outline" style="flex: 1; color: var(--color-danger); border-color: var(--color-danger);">
+          Simulate Payment Cancel/Fail
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

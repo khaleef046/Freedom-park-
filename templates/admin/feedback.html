@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Feedback — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="margin-bottom: var(--space-xl);">
+    <span class="section-tag">Guest Experiences</span>
+    <h1>Customer Feedback &amp; Reviews</h1>
+    <p style="color: var(--color-text-muted);">
+      Direct post-visit ratings and reviews from authenticated families.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
+    {% for f in feedback_list %}
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <div style="color: #F59E0B; font-size: 1.1rem;">
+            {% for _ in range(f.rating) %}★{% endfor %}
+            <span style="font-size: 0.85rem; color: var(--color-text-muted);">({{ f.rating }}/5)</span>
+          </div>
+          <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{ f.created_at.strftime('%b %d, %Y') }}</span>
+        </div>
+        <h4 style="margin-bottom: 0.25rem;">{{ f.category }}</h4>
+        <p style="color: var(--color-text-main); font-size: 0.95rem; margin-bottom: 0.75rem;">
+          "{{ f.message }}"
+        </p>
+        <form method="POST" action="{{ url_for('admin.update_feedback', id=f.id) }}" style="margin-top:.75rem"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><select name="status" class="form-select"><option {% if f.status=='NEW' %}selected{% endif %}>NEW</option><option {% if f.status=='REVIEWING' %}selected{% endif %}>REVIEWING</option><option {% if f.status=='RESOLVED' %}selected{% endif %}>RESOLVED</option><option {% if f.status=='CLOSED' %}selected{% endif %}>CLOSED</option></select><textarea name="admin_notes" class="form-control" rows="2" placeholder="Internal note">{{ f.admin_notes or '' }}</textarea><button class="btn btn-primary btn-sm" style="margin-top:.4rem">Save Review</button></form>
+        <div style="font-size: 0.85rem; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 0.5rem;">
+          Booking: <strong>{{ f.booking.booking_uid if f.booking else '—' }}</strong>
+        </div>
+      </div>
+    {% else %}
+      <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2.5rem; color: var(--color-text-muted);">
+        No customer feedback submitted yet.
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

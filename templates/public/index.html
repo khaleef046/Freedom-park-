@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ get_setting('park_name', 'Freedom Park') }} — Private Family Park | {{ get_setting('park_location', 'Pernambut, India') }}{% endblock %}
+
+{% block content %}
+<section class="hero-v4" style="--hero-image: url('{{ get_setting('hero_background_path', '/static/images/hero-v4-design-placeholder.jpg') }}');">
+  <div class="hero-v4-overlay"></div>
+  <div class="hero-v4-content container">
+    <div class="hero-v4-copy">
+      <div class="hero-v4-kicker">{{ get_setting('hero_kicker', 'Your Family · Your Time · Our Park') }}</div>
+      <span class="hero-v4-rule"></span>
+      <h1 class="hero-v4-title">
+        {{ get_setting('hero_title_line1', 'Nature Brings People') }}
+        <span>{{ get_setting('hero_title_line2', 'Together') }} <span class="hero-v4-leaf">⌁</span></span>
+      </h1>
+      <p class="hero-v4-subtitle">{{ get_setting('hero_subtitle', 'Escape the stress, enjoy the fresh air and make beautiful memories with your family and friends at Freedom Park.') }}</p>
+      <div class="hero-v4-actions">
+        <a href="{{ url_for('customer.book') }}" class="btn hero-v4-primary">📅&nbsp; Check Availability &amp; Book <span>→</span></a>
+        <a href="{{ url_for('public.pricing') }}" class="btn hero-v4-secondary">📅&nbsp; View Day Rates</a>
+      </div>
+    </div>
+
+    <div class="hero-v4-collage" aria-label="Freedom Park photo preview">
+      {% for p in gallery_photos[:3] %}
+        {% if p.image_path %}
+        <figure class="hero-v4-photo hero-v4-photo-{{ loop.index }}">
+          <img src="{{ p.image_path }}" alt="{{ p.title }}" loading="eager">
+        </figure>
+        {% endif %}
+      {% endfor %}
+      {% if not gallery_photos|selectattr('image_path')|list %}
+        <div class="hero-v4-photo-placeholder">
+          <span>🌿</span>
+          <strong>Freedom Park</strong>
+          <small>Add your real park photos in Content Management</small>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="hero-v4-bottom">
+    <div class="container hero-v4-benefits">
+      <div><span>👨‍👩‍👧‍👦</span><div><strong>Family &amp; Friends</strong><small>Private booking for your group</small></div></div>
+      <div><span>🛡️</span><div><strong>Safe &amp; Secure</strong><small>Clean, safe and well maintained</small></div></div>
+      <div><span>🌿</span><div><strong>Nature Vibes</strong><small>Green, peaceful, refreshing</small></div></div>
+      <div><span>✓</span><div><strong>Simple Booking</strong><small>Fast, easy and hassle free</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="home-glance-v4">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">YOUR DAY AT FREEDOM PARK</span>
+      <h2>Everything is reserved for your group.</h2>
+      <p style="color: var(--color-text-muted);">One private booking gives your family or group exclusive access for the day.</p>
+    </div>
+    <div class="glance-grid">
+      <div class="glance-item"><span>👥</span><div><strong>Up to {{ get_setting_int('max_capacity', 100) }} guests</strong><small>One private group per day</small></div></div>
+      <div class="glance-item"><span>🕗</span><div><strong>{{ get_setting('operating_hours', '8:00 AM – 8:00 PM') }}</strong><small>A full private day</small></div></div>
+      <div class="glance-item"><span>₹</span><div><strong>Flat day pricing</strong><small>No per-person surcharge</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="home-gallery-v4" id="gallery-preview">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">GALLERY</span>
+      <h2>{{ get_setting('gallery_heading', 'A Glimpse of Freedom Park') }}</h2>
+      <p style="color: var(--color-text-muted);">{{ get_setting('gallery_subtitle', 'See the greenery, open spaces and peaceful moments waiting for your family.') }}</p>
+    </div>
+
+    {% set usable_photos = gallery_photos|selectattr('image_path')|list %}
+    {% if usable_photos %}
+      <div class="home-gallery-grid-v4">
+        {% for p in usable_photos[:6] %}
+          <a class="home-gallery-card-v4" href="{{ url_for('public.gallery') }}">
+            <img src="{{ p.image_path }}" alt="{{ p.title }}" loading="lazy">
+            <span>{{ p.title }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="gallery-empty-v4">
+        <div class="gallery-empty-icon">🌿</div>
+        <h3>Your Freedom Park gallery will appear here</h3>
+        <p>Add your real park photos from Content Management. We won't use fake photos as real park images.</p>
+        <a href="{{ url_for('public.gallery') }}" class="btn btn-outline">Open Gallery</a>
+      </div>
+    {% endif %}
+
+    <div class="home-gallery-cta-v4"><a href="{{ url_for('public.gallery') }}" class="btn btn-outline">View Full Gallery →</a></div>
+  </div>
+</section>
+
+<section class="section" style="background-color: var(--color-surface);">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">PRIVATE PARK EXPERIENCE</span>
+      <h2>A full day, just for your people.</h2>
+      <p style="color: var(--color-text-muted);">Enjoy open space, greenery, games and family time without sharing the park with another booking.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-lg);">
+      <div class="card"><div style="font-size:2rem;">🔒</div><h3>Private for Your Group</h3><p style="color:var(--color-text-muted);">One booking means the park is reserved for your family or group.</p></div>
+      <div class="card"><div style="font-size:2rem;">🌳</div><h3>Green &amp; Peaceful</h3><p style="color:var(--color-text-muted);">Enjoy fresh air, greenery and open spaces away from crowded places.</p></div>
+      <div class="card"><div style="font-size:2rem;">🏏</div><h3>Games &amp; Activities</h3><p style="color:var(--color-text-muted);">Spend the day playing, relaxing and making memories together.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background-color: var(--color-primary); color:#fff; text-align:center;">
+  <div class="container" style="max-width:760px;">
+    <span class="badge" style="background:rgba(255,255,255,.15);color:#fff;">RESERVE YOUR FAMILY DAY</span>
+    <h2 style="color:#fff;margin-top:1rem;">Pick your date. Make it your day.</h2>
+    <p style="color:#D8F3DC;">Check availability and book the entire park for your family or group.</p>
+    <a href="{{ url_for('customer.book') }}" class="btn btn-lg" style="background:var(--color-accent-light);color:#081C15;font-weight:800;">Check Availability &amp; Book →</a>
+  </div>
+</section>
+{% endblock %}

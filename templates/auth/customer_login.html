@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Customer Booking Details — Freedom Park{% endblock %}
+{% block content %}
+<div class="container section" style="max-width: 520px;">
+  <div class="card customer-entry-card">
+    <div class="entry-heading"><span class="section-tag">QUICK BOOKING</span><h2>Tell us who is booking</h2><p>Enter your name and mobile number to continue. No OTP is required.</p></div>
+    <form method="POST" action="{{ url_for('auth.customer_login', next=request.args.get('next')) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label for="name" class="form-label">Full Name</label><input type="text" id="name" name="name" class="form-control" required maxlength="120" autocomplete="name" placeholder="Your name"></div>
+      <div class="form-group"><label for="phone" class="form-label">Mobile Number</label><div class="phone-entry"><span>+91</span><input type="tel" id="phone" name="phone" class="form-control" required pattern="[6-9][0-9]{9}" maxlength="10" inputmode="numeric" autocomplete="tel" placeholder="9876543210"></div><div class="form-hint">Use a number you can be reached on for booking-related communication.</div></div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Continue to Booking →</button>
+    </form>
+    <div class="staff-entry-note">Park Staff or Administrator? <a href="{{ url_for('auth.staff_login') }}">Staff Login →</a></div>
+  </div>
+</div>
+{% endblock %}

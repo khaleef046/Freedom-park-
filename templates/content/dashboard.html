@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Content Management — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--space-2xl);">
+    <div>
+      <span class="section-tag">Content Staff Portal</span>
+      <h1 style="margin-bottom: 0.25rem;">Website Content Management</h1>
+      <p style="color: var(--color-text-muted); margin: 0;">
+        Manage gallery photos, activity highlights, facilities, and announcements without source code edits.
+      </p>
+    </div>
+    <div>
+      <a href="{{ url_for('content_bp.add_item', type=current_type) }}" class="btn btn-primary btn-sm">+ Add New {{ current_type.capitalize() }}</a>
+    </div>
+  </div>
+
+  <!-- Content Type Filter Tabs -->
+  <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-xl); border-bottom: 2px solid var(--color-border); padding-bottom: var(--space-sm); overflow-x: auto;">
+    {% for ct in content_types %}
+      <a href="{{ url_for('content_bp.dashboard', type=ct) }}" class="btn btn-sm {% if current_type == ct %}btn-primary{% else %}btn-secondary{% endif %}">
+        {{ ct.capitalize() }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Items List Table -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Title</th>
+            <th>Description / Body</th>
+            <th>Image URL / Path</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+            <tr>
+              <td>{{ item.display_order }}</td>
+              <td><strong>{{ item.title }}</strong></td>
+              <td style="max-width: 250px;">{{ item.body or '—' }}</td>
+              <td style="font-size: 0.85rem; color: var(--color-text-muted);">{{ item.image_path or '—' }}</td>
+              <td>
+                <span class="badge {% if item.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                  {{ 'Active' if item.is_active else 'Hidden' }}
+                </span>
+              </td>
+              <td style="display: flex; gap: 0.5rem;">
+                <a href="{{ url_for('content_bp.edit_item', id=item.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('content_bp.toggle_status', id=item.id) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-secondary btn-sm">
+                    {{ 'Hide' if item.is_active else 'Activate' }}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+                No {{ current_type }} items created yet. Click "+ Add New" above.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Ticket — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 580px;">
+  <div class="card" style="text-align: center; padding: var(--space-2xl);">
+    {% if found and is_valid %}
+      <div style="font-size: 3.5rem; color: var(--color-primary); margin-bottom: 1rem;">✅</div>
+      <span class="badge badge-success" style="font-size: 0.95rem; padding: 0.4rem 1rem; margin-bottom: 1.5rem;">
+        VERIFIED & ACTIVE PASS
+      </span>
+      <h2 style="margin-bottom: 0.25rem;">Freedom Park Digital Pass</h2>
+      <div style="font-family: var(--font-family-mono); font-size: 1.25rem; font-weight: 800; color: var(--color-primary); margin-bottom: 1.5rem;">
+        {{ booking.booking_uid }}
+      </div>
+
+      <div style="text-align: left; background: var(--color-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Booking Date:</span>
+          <span class="pass-meta-val">{{ format_date_long(booking.booking_date) }}</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Operating Hours:</span>
+          <span class="pass-meta-val">8:00 AM – 8:00 PM</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Allowed Guests:</span>
+          <span class="pass-meta-val">Up to {{ booking.num_people }} People</span>
+        </div>
+        <div class="pass-meta-row">
+          <span class="pass-meta-label">Primary Guest:</span>
+          <span class="pass-meta-val">{{ booking.customer_name }}</span>
+        </div>
+        <div class="pass-meta-row" style="border: none;">
+          <span class="pass-meta-label">Status:</span>
+          <span class="pass-meta-val" style="color: var(--color-primary);">CONFIRMED & DATE LOCKED</span>
+        </div>
+      </div>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem;">
+        Official security verification &bull; Freedom Park, Pernambut, India.
+      </p>
+
+    {% elif found and not is_valid %}
+      <div style="font-size: 3.5rem; color: var(--color-danger); margin-bottom: 1rem;">⚠️</div>
+      <span class="badge badge-danger" style="font-size: 0.95rem; padding: 0.4rem 1rem; margin-bottom: 1.5rem;">
+        PASS NOT ACTIVE
+      </span>
+      <h2>Booking Status: {{ booking.status }}</h2>
+      <p style="color: var(--color-text-muted); margin-top: 1rem;">
+        This pass (ID: {{ booking.booking_uid }}) is not valid for entry today. Please contact park administration.
+      </p>
+
+    {% else %}
+      <div style="font-size: 3.5rem; color: var(--color-danger); margin-bottom: 1rem;">❌</div>
+      <span class="badge badge-danger" style="font-size: 0.95rem; padding: 0.4rem 1rem; margin-bottom: 1.5rem;">
+        INVALID TICKET
+      </span>
+      <h2>Ticket Not Found</h2>
+      <p style="color: var(--color-text-muted); margin-top: 1rem;">
+        The scanned QR code does not correspond to an active Freedom Park booking pass.
+      </p>
+    {% endif %}
+
+    <div style="margin-top: 1.5rem;">
+      <a href="{{ url_for('public.index') }}" class="btn btn-outline btn-sm">&larr; Return to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

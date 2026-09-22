@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Business Settings — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 760px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Central Configuration</span>
+      <h2>System &amp; Business Settings</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Modify business parameters, contact numbers, and policies without editing application source code.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.settings') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <!-- Park Identity -->
+      <h3 style="color: var(--color-primary); margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+        Park Identity &amp; Capacity
+      </h3>
+
+      <div class="form-group">
+        <label for="park_name" class="form-label">Park Name</label>
+        <input type="text" id="park_name" name="park_name" class="form-control" value="{{ settings.get('park_name', 'FREEDOM PARK') }}">
+      </div>
+
+      <div class="form-group">
+        <label for="park_location" class="form-label">Park Location</label>
+        <input type="text" id="park_location" name="park_location" class="form-control" value="{{ settings.get('park_location', 'Pernambut, India') }}">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+        <div class="form-group">
+          <label for="operating_hours" class="form-label">Operating Hours</label>
+          <input type="text" id="operating_hours" name="operating_hours" class="form-control" value="{{ settings.get('operating_hours', '8:00 AM – 8:00 PM') }}">
+        </div>
+
+        <div class="form-group">
+          <label for="max_capacity" class="form-label">Maximum Capacity (Guests)</label>
+          <input type="number" id="max_capacity" name="max_capacity" class="form-control" min="10" max="200" value="{{ settings.get('max_capacity', '100') }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="booking_window_days" class="form-label">Booking Window (Days into future)</label>
+        <input type="number" id="booking_window_days" name="booking_window_days" class="form-control" min="7" max="180" value="{{ settings.get('booking_window_days', '30') }}">
+        <div class="form-hint">How many days in advance guests are permitted to book online.</div>
+      </div>
+
+      <!-- Contact Details -->
+      <h3 style="color: var(--color-primary); margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+        Contact Numbers &amp; Maps
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+        <div class="form-group">
+          <label for="park_phone" class="form-label">Official Phone Number</label>
+          <input type="text" id="park_phone" name="park_phone" class="form-control" value="{{ settings.get('park_phone', '') }}" placeholder="e.g. 9876543210">
+        </div>
+
+        <div class="form-group">
+          <label for="park_whatsapp" class="form-label">WhatsApp Number</label>
+          <input type="text" id="park_whatsapp" name="park_whatsapp" class="form-control" value="{{ settings.get('park_whatsapp', '') }}" placeholder="e.g. 919876543210">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="google_maps_url" class="form-label">Google Maps Direct URL</label>
+        <input type="url" id="google_maps_url" name="google_maps_url" class="form-control" value="{{ settings.get('google_maps_url', '') }}" placeholder="https://maps.google.com/...">
+      </div>
+
+      <!-- Cancellation Policy -->
+      <h3 style="color: var(--color-primary); margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+        Cancellation Policy Parameters
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md);">
+        <div class="form-group">
+          <label for="customer_cancel_threshold_hours" class="form-label">Threshold (Hours)</label>
+          <input type="number" id="customer_cancel_threshold_hours" name="customer_cancel_threshold_hours" class="form-control" value="{{ settings.get('customer_cancel_threshold_hours', '24') }}">
+        </div>
+
+        <div class="form-group">
+          <label for="customer_cancel_refund_before" class="form-label">Refund Before (%)</label>
+          <input type="number" id="customer_cancel_refund_before" name="customer_cancel_refund_before" class="form-control" value="{{ settings.get('customer_cancel_refund_before', '50') }}">
+        </div>
+
+        <div class="form-group">
+          <label for="customer_cancel_refund_after" class="form-label">Refund After (%)</label>
+          <input type="number" id="customer_cancel_refund_after" name="customer_cancel_refund_after" class="form-control" value="{{ settings.get('customer_cancel_refund_after', '0') }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cancellation_policy_text" class="form-label">Public Policy Notice Text</label>
+        <textarea id="cancellation_policy_text" name="cancellation_policy_text" class="form-control" rows="3">{{ settings.get('cancellation_policy_text', '') }}</textarea>
+      </div>
+
+      <!-- Staff Commission -->
+      <h3 style="color: var(--color-primary); margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+        Staff Partner Commission
+      </h3>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-md);margin-bottom:1rem;">
+        {% for key,label in [('partner_commission_enabled','Commission System'),('partner_commission_wallet_enabled','Commission Wallet'),('partner_levels_enabled','Partner Levels'),('partner_share_availability_enabled','Share Available Dates')] %}
+        <label class="card" style="display:flex;gap:.7rem;align-items:center;padding:1rem;"><input type="checkbox" name="{{ key }}" value="1" {% if settings.get(key,'1') in ['1',1,true,'true','True'] %}checked{% endif %}> <span>{{ label }} ON</span></label>
+        {% endfor %}
+      </div>
+      {% if current_user.is_super_admin %}<label class="card" style="display:flex;gap:.7rem;align-items:center;padding:1rem;margin-bottom:1rem;"><input type="checkbox" name="partner_referral_links_enabled" value="1" {% if settings.get('partner_referral_links_enabled','1') in ['1',1,true,'true','True'] %}checked{% endif %}> <span>Referral Links ON <small>(System Administrator only)</small></span></label>{% endif %}
+      <div class="form-group">
+        <label for="default_commission" class="form-label">Default Fixed Commission per Booking (₹)</label>
+        <input type="number" id="default_commission" name="default_commission" class="form-control" step="50" value="{{ settings.get('default_commission', '500') }}">
+        <div class="form-hint">Awarded to registered Staff Partners upon successful customer booking.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.5rem;">
+        Save All Business Settings
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

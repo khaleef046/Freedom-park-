@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Facilities & Amenities — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="section-header">
+    <span class="section-tag">Amenities</span>
+    <h1>Park Facilities & Comfort</h1>
+    <p style="color: var(--color-text-muted);">
+      Designed for whole-family comfort, leisure, and celebration in Pernambut.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl);">
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏡</div>
+      <h3>Covered Seating Pavilions</h3>
+      <p style="color: var(--color-text-muted);">
+        Comfortable shaded seating areas to relax, dine, and spend quality time with family.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚻</div>
+      <h3>Clean Restroom Facilities</h3>
+      <p style="color: var(--color-text-muted);">
+        Well-maintained, hygienic separate restroom facilities for men and women.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🅿️</div>
+      <h3>Secure Vehicle Parking</h3>
+      <p style="color: var(--color-text-muted);">
+        Dedicated safe parking area for guest cars and two-wheelers inside the premises.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">💧</div>
+      <h3>Drinking Water & Handwash</h3>
+      <p style="color: var(--color-text-muted);">
+        Clean drinking water stations and convenient washing facilities for guests.
+      </p>
+    </div>
+
+    {% for item in facilities %}
+      <div class="card">
+        <h3>{{ item.title }}</h3>
+        <p style="color: var(--color-text-muted);">{{ item.body }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="text-align: center; margin-top: var(--space-3xl);">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Check Available Dates</a>
+  </div>
+</div>
+{% endblock %}

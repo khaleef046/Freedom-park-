@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Check-Out — Freedom Park Security{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 650px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Guest Departure</span>
+      <h2>Equipment Return Check-Out</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Booking: <strong>{{ booking.booking_uid }}</strong> &bull; Guest: <strong>{{ booking.customer_name }}</strong>
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('security_bp.checkout', booking_id=booking.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <h3 style="color: var(--color-primary); margin-bottom: 1rem; font-size: 1.1rem;">
+        Verify Equipment Condition &amp; Return:
+      </h3>
+
+      {% for eq in equipment_list %}
+        <div style="padding: 1rem 0; border-bottom: 1px solid var(--color-border);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div>
+              <strong>{{ eq.name }}</strong> (Expected: {{ eq.quantity }})
+            </div>
+            <select name="status_{{ eq.id }}" class="form-select" style="width: 160px;">
+              <option value="RETURNED" selected>✓ Returned OK</option>
+              <option value="MISSING">❌ Missing</option>
+              <option value="DAMAGED">⚠️ Damaged</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="number" name="qty_{{ eq.id }}" class="form-control" style="width: 80px; text-align: center;" value="{{ eq.quantity }}" min="0" max="{{ eq.quantity }}" placeholder="Qty">
+            <input type="text" name="note_{{ eq.id }}" class="form-control" placeholder="Condition note if damaged or missing...">
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label for="notes" class="form-label">Departure Remarks / Handover Notes</label>
+        <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="e.g., Guest departed at 7:45 PM, premises inspected"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Finalize Departure Check-Out</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

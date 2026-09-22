@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Complaints — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="margin-bottom: var(--space-xl);">
+    <span class="section-tag">Quality Assurance</span>
+    <h1>Customer Complaints</h1>
+    <p style="color: var(--color-text-muted);">
+      Monitor and resolve guest concerns to maintain premium park standards.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Booking Reference</th>
+            <th>Message</th>
+            <th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td>{{ c.created_at.strftime('%b %d, %Y') }}</td>
+              <td><strong>{{ c.category }}</strong></td>
+              <td>
+                {% if c.priority == 'URGENT' %}
+                  <span class="badge badge-danger">Urgent</span>
+                {% elif c.priority == 'HIGH' %}
+                  <span class="badge badge-warning">High</span>
+                {% else %}
+                  <span class="badge badge-info">{{ c.priority }}</span>
+                {% endif %}
+              </td>
+              <td style="font-family: var(--font-family-mono);">
+                {{ c.booking.booking_uid if c.booking else '—' }}
+              </td>
+              <td style="max-width: 320px;">{{ c.message }}</td>
+              <td><span class="badge {% if c.status == 'RESOLVED' %}badge-success{% elif c.status == 'NEW' %}badge-warning{% else %}badge-secondary{% endif %}">{{ c.status }}</span></td>
+              <td><form method="POST" action="{{ url_for('admin.update_complaint', id=c.id) }}" style="display:grid;gap:.4rem;min-width:180px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><select name="status" class="form-select"><option {% if c.status=='NEW' %}selected{% endif %}>NEW</option><option {% if c.status=='IN_PROGRESS' %}selected{% endif %}>IN_PROGRESS</option><option {% if c.status=='RESOLVED' %}selected{% endif %}>RESOLVED</option><option {% if c.status=='CLOSED' %}selected{% endif %}>CLOSED</option></select><input class="form-control" name="resolution_note" placeholder="Internal note"><button class="btn btn-primary btn-sm">Save</button></form></td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+                No customer complaints reported.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

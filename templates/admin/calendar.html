@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar Management — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--space-xl);">
+    <div>
+      <span class="section-tag">Central Availability</span>
+      <h1 style="margin-bottom: 0.25rem;">Admin Calendar</h1>
+      <p style="color: var(--color-text-muted); margin: 0;">
+        Click any available date to create a manual booking or initiate an emergency lock.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="{{ url_for('admin.manual_booking') }}" class="btn btn-primary btn-sm">+ Manual Booking</a>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-2xl); align-items: start;">
+    <!-- Calendar Component Column -->
+    <div>
+      <div id="adminCalendar" class="calendar-widget" style="max-width: 100%;"></div>
+    </div>
+
+    <!-- Date Actions Panel Column -->
+    <div class="card" id="dateActionPanel" style="box-shadow: var(--shadow-md);">
+      <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;" id="panelDateTitle">Select a Date</h3>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;" id="panelDateSubtitle">
+        Click a date on the calendar to view details or perform actions.
+      </p>
+
+      <div id="panelActions" style="margin-top: 1.5rem; display: none;">
+        <!-- Available Date Actions -->
+        <div id="availableActions" style="display: none;">
+          <span class="badge badge-success" style="margin-bottom: 1rem;">DATE IS AVAILABLE</span>
+          <p style="font-size: 0.95rem; color: var(--color-text-muted);">
+            You can manually reserve this date for a customer calling via phone/WhatsApp, or lock it for maintenance.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+            <a id="btnManualBook" href="#" class="btn btn-primary btn-block">+ Create Manual Booking</a>
+            <button type="button" class="btn btn-outline btn-block" style="color: var(--color-danger); border-color: var(--color-danger);" onclick="document.getElementById('lockDateModal').style.display='flex'">
+              🔒 Emergency Lock Date
+            </button>
+          </div>
+        </div>
+
+        <!-- Booked Date Actions -->
+        <div id="bookedActions" style="display: none;">
+          <span class="badge badge-danger" style="margin-bottom: 1rem;">DATE IS BOOKED</span>
+          <div id="bookedDetailsBox" style="background: var(--color-surface-alt); padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 1rem;">Loading reservation details...</div>
+          <div id="adminCancelBox" style="display:none; border-top:1px solid var(--color-border); padding-top:1rem;">
+            <h4 style="margin:0 0 .5rem;">Cancel this booking</h4>
+            <form method="POST" id="adminCancelForm">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group"><label class="form-label">Reason</label><textarea name="reason" class="form-control" rows="2" required placeholder="Why is this booking being cancelled?"></textarea></div>
+              <label style="display:flex;gap:.5rem;align-items:center;margin:.75rem 0;font-size:.9rem;"><input type="checkbox" name="is_park_fault"> Park cancellation / maintenance (100% refund)</label>
+              <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Cancel this booking and apply the configured refund policy?');">Cancel Booking &amp; Process Refund</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Blocked Date Actions -->
+        <div id="blockedActions" style="display: none;">
+          <span class="badge badge-warning" style="margin-bottom: 1rem;">DATE IS BLOCKED</span>
+          <p style="font-size: 0.92rem; color: var(--color-text-muted);">
+            This date was manually locked for park maintenance or private administrative reasons.
+          </p>
+          <form method="POST" action="{{ url_for('admin.unlock_date') }}" style="margin-top: 1rem;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="date" id="unlockDateInput">
+            <button type="submit" class="btn btn-primary btn-block">🔓 Remove Block &amp; Make Available</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Lock Date Modal -->
+<div id="lockDateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+  <div class="card" style="max-width: 440px; width: 90%;">
+    <h3>🔒 Emergency Lock Date</h3>
+    <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+      Locking a date immediately prevents all online and staff partner bookings.
+    </p>
+    <form method="POST" action="{{ url_for('admin.lock_date') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="date" id="lockDateInput">
+
+      <div class="form-group">
+        <label class="form-label">Reason for Lock</label>
+        <select name="reason" class="form-select" required>
+          <option value="Facility Maintenance">Facility Maintenance</option>
+          <option value="Private Park Event">Private Park Event</option>
+          <option value="Weather / Unforeseen Circumstance">Weather / Unforeseen Circumstance</option>
+          <option value="Other Administrative Hold">Other Administrative Hold</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('lockDateModal').style.display='none'">Cancel</button>
+        <button type="submit" class="btn btn-danger btn-sm">Confirm Lock</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const panelTitle = document.getElementById("panelDateTitle");
+    const panelSubtitle = document.getElementById("panelDateSubtitle");
+    const panelActions = document.getElementById("panelActions");
+    const availableActions = document.getElementById("availableActions");
+    const bookedActions = document.getElementById("bookedActions");
+    const blockedActions = document.getElementById("blockedActions");
+    const btnManualBook = document.getElementById("btnManualBook");
+    const lockDateInput = document.getElementById("lockDateInput");
+    const unlockDateInput = document.getElementById("unlockDateInput");
+
+    new FreedomCalendar("adminCalendar", {
+      isAdmin: true,
+      onDateSelected: (dateStr, status, price) => {
+        panelActions.style.display = "block";
+        availableActions.style.display = "none";
+        bookedActions.style.display = "none";
+        blockedActions.style.display = "none";
+        document.getElementById("adminCancelBox").style.display = "none";
+
+        panelTitle.textContent = dateStr;
+        panelSubtitle.textContent = `Status: ${status} &bull; Base Price: ₹${price}`;
+
+        lockDateInput.value = dateStr;
+        unlockDateInput.value = dateStr;
+
+        if (status === "AVAILABLE") {
+          availableActions.style.display = "block";
+          btnManualBook.href = `{{ url_for('admin.manual_booking') }}?date=${dateStr}`;
+        } else if (status === "BOOKED") {
+          bookedActions.style.display = "block";
+          fetch(`/api/calendar/booking-details?date=${dateStr}`)
+            .then(r => r.json()).then(data => {
+              const box = document.getElementById("bookedDetailsBox");
+              if (!data.booking) { box.textContent = "Booking details unavailable."; return; }
+              const b = data.booking;
+              box.innerHTML = `<strong>${b.booking_uid}</strong><br>Customer: ${b.customer_name}<br>Phone: ${b.customer_phone || '—'}<br>Guests: ${b.num_people}<br>Amount: ₹${b.amount}<br>Status: ${b.status}`;
+              document.getElementById('adminCancelBox').style.display = 'block';
+              document.getElementById('adminCancelForm').action = `/admin/cancel-booking/${b.id}`;
+            }).catch(() => { document.getElementById("bookedDetailsBox").textContent = "Could not load booking details."; });
+        } else if (status === "BLOCKED") {
+          blockedActions.style.display = "block";
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

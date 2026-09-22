@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Activities & Sports — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="section-header">
+    <span class="section-tag">Recreation</span>
+    <h1>Activities & Outdoor Games</h1>
+    <p style="color: var(--color-text-muted);">
+      Outdoor sports and indoor table games to keep every age group engaged throughout the day.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl);">
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏏</div>
+      <h3>Cricket Ground & Kit</h3>
+      <p style="color: var(--color-text-muted);">
+        Spacious grass turf suitable for family friendly cricket matches. Bats and balls provided on check-in.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+      <h3>Carrom & Table Games</h3>
+      <p style="color: var(--color-text-muted);">
+        Smooth carrom boards with coins and striker for relaxing indoor game sessions.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎾</div>
+      <h3>Racket Sports & Badminton</h3>
+      <p style="color: var(--color-text-muted);">
+        Open courts for badminton and tennis racket rallies for adults and youth.
+      </p>
+    </div>
+
+    {% for act in activities %}
+      <div class="card">
+        <h3>{{ act.title }}</h3>
+        <p style="color: var(--color-text-muted);">{{ act.body }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="text-align: center; margin-top: var(--space-3xl);">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Book Freedom Park</a>
+  </div>
+</div>
+{% endblock %}

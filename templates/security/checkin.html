@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Check-In — Freedom Park Security{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 600px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Guest Arrival</span>
+      <h2>Equipment Handover Check-In</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Booking: <strong>{{ booking.booking_uid }}</strong> &bull; Guest: <strong>{{ booking.customer_name }}</strong>
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('security_bp.checkin', booking_id=booking.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <h3 style="color: var(--color-primary); margin-bottom: 1rem; font-size: 1.1rem;">
+        Verify Equipment Handed Over:
+      </h3>
+
+      {% for eq in equipment_list %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--color-border);">
+          <div>
+            <strong>{{ eq.name }}</strong>
+            <div style="font-size: 0.8rem; color: var(--color-text-muted);">Standard: {{ eq.quantity }} units</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-size: 0.85rem; color: var(--color-text-muted);">Count:</label>
+            <input type="number" name="qty_{{ eq.id }}" class="form-control" style="width: 80px; text-align: center;" value="{{ eq.quantity }}" min="0" max="999">
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label for="notes" class="form-label">Security Check-In Remarks (Optional)</label>
+        <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="e.g., Guest arrived at 8:30 AM, 25 members present"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Complete Handover &amp; Check-In &rarr;</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

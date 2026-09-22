@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Book for Customer — Freedom Park Staff Partner{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 600px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Partner Booking</span>
+      <h2>Create Customer Reservation</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Reserve a date on behalf of your customer. Once submitted, the date is locked and commission is recorded.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('staff.create_booking') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="booking_date" class="form-label">Booking Date</label>
+        <input type="date" id="booking_date" name="booking_date" class="form-control" required value="{{ prefill_date or '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="customer_name" class="form-label">Customer Name</label>
+        <input type="text" id="customer_name" name="customer_name" class="form-control" required placeholder="Guest full name">
+      </div>
+
+      <div class="form-group">
+        <label for="customer_phone" class="form-label">Customer Mobile Number</label>
+        <input type="tel" id="customer_phone" name="customer_phone" class="form-control" required placeholder="10-digit mobile number">
+      </div>
+
+      <div class="form-group">
+        <label for="num_people" class="form-label">Number of Guests (Max 100)</label>
+        <input type="number" id="num_people" name="num_people" class="form-control" required min="1" max="100" value="25">
+      </div>
+
+      <div class="form-group">
+        <label for="notes" class="form-label">Notes / Booking Details</label>
+        <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="e.g., Payment collected in cash/UPI by staff partner"></textarea>
+      </div>
+
+      <div style="background-color: var(--color-primary-soft); padding: 0.85rem; border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-primary); margin-bottom: 1.5rem;">
+        💰 Partner Commission (₹{{ get_setting('default_commission', '500') }}) will be credited in Pending status upon confirmation.
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Confirm Customer Booking &rarr;</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

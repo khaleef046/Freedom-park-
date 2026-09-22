@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--space-2xl);">
+    <div>
+      <span class="section-tag">Customer Account</span>
+      <h1 style="margin-bottom: 0.25rem;">My Bookings</h1>
+      <p style="color: var(--color-text-muted); margin: 0;">
+        Welcome, {{ current_user.name or current_user.phone }}
+      </p>
+    </div>
+    <div style="display: flex; gap: var(--space-sm);">
+      <a href="{{ url_for('customer.book') }}" class="btn btn-primary">+ Book a New Date</a>
+      <a href="{{ url_for('customer.submit_complaint') }}" class="btn btn-outline btn-sm">Report an Issue</a>
+    </div>
+  </div>
+
+  <!-- Pending Payment Bookings -->
+  {% if pending %}
+    <div style="margin-bottom: var(--space-2xl);">
+      <h3 style="color: var(--color-warning); margin-bottom: 1rem;">Pending Payment</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
+        {% for b in pending %}
+          <div class="card" style="border-left: 5px solid var(--color-warning);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="badge badge-warning">Awaiting Payment</span>
+              <span style="font-family: var(--font-family-mono); font-weight: 700;">{{ b.booking_uid }}</span>
+            </div>
+            <h4>{{ format_date_long(b.booking_date) }}</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+              👥 Up to {{ b.num_people }} guests &bull; ⏰ 8:00 AM – 8:00 PM<br>
+              💰 Total: {{ format_currency(b.amount) }}
+            </p>
+            <div style="display: flex; gap: var(--space-sm); margin-top: 1rem;">
+              <a href="{{ url_for('customer.pay', booking_uid=b.booking_uid) }}" class="btn btn-primary btn-sm btn-block">Complete Payment &rarr;</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Upcoming Confirmed Bookings -->
+  <div style="margin-bottom: var(--space-2xl);">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Upcoming Visits</h3>
+    {% if upcoming %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
+        {% for b in upcoming %}
+          <div class="card" style="border-left: 5px solid var(--color-primary);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="badge badge-success">Confirmed</span>
+              <span style="font-family: var(--font-family-mono); font-weight: 700;">{{ b.booking_uid }}</span>
+            </div>
+            <h4>{{ format_date_long(b.booking_date) }}</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+              👥 Up to {{ b.num_people }} guests &bull; ⏰ 8:00 AM – 8:00 PM<br>
+              💰 Amount Paid: {{ format_currency(b.amount) }}
+            </p>
+            <div style="display: flex; gap: var(--space-sm); margin-top: 1rem; flex-wrap: wrap;">
+              <a href="{{ url_for('customer.digital_pass', booking_uid=b.booking_uid) }}" class="btn btn-primary btn-sm">View Digital Pass 🎟️</a>
+              <a href="{{ url_for('customer.confirmation', booking_uid=b.booking_uid) }}" class="btn btn-secondary btn-sm">Receipt</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+        You have no upcoming bookings at Freedom Park.
+        <div style="margin-top: 1rem;">
+          <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-sm">Reserve a Date</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Completed Past Bookings -->
+  {% if completed %}
+    <div style="margin-bottom: var(--space-2xl);">
+      <h3 style="color: var(--color-text-muted); margin-bottom: 1rem;">Past Visits</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
+        {% for b in completed %}
+          <div class="card" style="opacity: 0.9;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="badge badge-info">Completed</span>
+              <span style="font-family: var(--font-family-mono); font-size: 0.85rem;">{{ b.booking_uid }}</span>
+            </div>
+            <h4>{{ format_date_long(b.booking_date) }}</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.88rem;">
+              👥 {{ b.num_people }} guests &bull; {{ format_currency(b.amount) }}
+            </p>
+            <div style="display: flex; gap: var(--space-sm); margin-top: 0.75rem;">
+              <a href="{{ url_for('customer.submit_feedback', booking_uid=b.booking_uid) }}" class="btn btn-outline btn-sm">Leave Feedback ⭐</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Cancelled Bookings -->
+  {% if cancelled %}
+    <div>
+      <h3 style="color: var(--color-text-muted); margin-bottom: 1rem;">Cancelled Bookings</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
+        {% for b in cancelled %}
+          <div class="card" style="opacity: 0.75; background: var(--color-surface-alt);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="badge badge-danger">Cancelled</span>
+              <span style="font-family: var(--font-family-mono); font-size: 0.85rem;">{{ b.booking_uid }}</span>
+            </div>
+            <h4>{{ format_date_long(b.booking_date) }}</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.85rem;">
+              {{ b.cancellation_reason or 'Cancelled per policy' }}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

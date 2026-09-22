@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact & Location — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 860px;">
+  <div class="section-header">
+    <span class="section-tag">Find Us</span>
+    <h1>Contact & Location</h1>
+    <p style="color: var(--color-text-muted);">
+      Located in Pernambut, India. Get in touch for booking questions and driving directions.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-xl); margin-bottom: var(--space-2xl);">
+    <div class="card">
+      <h3 style="color: var(--color-primary); margin-bottom: 1.25rem;">Park Information</h3>
+      
+      <div style="margin-bottom: 1rem;">
+        <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">Location:</span>
+        <p style="font-size: 1.05rem; font-weight: 600; margin-top: 0.25rem;">
+          📍 {{ get_setting('park_location', 'Pernambut, India') }}
+        </p>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">Operating Timings:</span>
+        <p style="font-size: 1.05rem; font-weight: 600; margin-top: 0.25rem;">
+          ⏰ {{ get_setting('operating_hours', '8:00 AM – 8:00 PM') }}
+        </p>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">Capacity:</span>
+        <p style="font-size: 1.05rem; font-weight: 600; margin-top: 0.25rem;">
+          👥 Up to {{ get_setting('max_capacity', 100) }} Guests (Exclusive Single-Party Access)
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="color: var(--color-primary); margin-bottom: 1.25rem;">Direct Communication</h3>
+      
+      {% set phone = get_setting('park_phone', '') %}
+      {% if phone %}
+        <div style="margin-bottom: 1.25rem;">
+          <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">Telephone:</span>
+          <p style="margin-top: 0.25rem;">
+            📞 <a href="tel:{{ phone }}" style="font-size: 1.1rem; font-weight: 700;">{{ phone }}</a>
+          </p>
+        </div>
+      {% else %}
+        <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+          Phone inquiry line will be displayed here once configured in settings.
+        </p>
+      {% endif %}
+
+      {% set whatsapp = get_setting('park_whatsapp', '') %}
+      {% if whatsapp %}
+        <div style="margin-bottom: 1.25rem;">
+          <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">WhatsApp:</span>
+          <p style="margin-top: 0.25rem;">
+            <a href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex;">
+              💬 Chat on WhatsApp
+            </a>
+          </p>
+        </div>
+      {% endif %}
+
+      {% set maps_url = get_setting('google_maps_url', '') %}
+      {% if maps_url %}
+        <div>
+          <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase;">Google Maps:</span>
+          <p style="margin-top: 0.25rem;">
+            <a href="{{ maps_url }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+              🗺️ Open in Google Maps
+            </a>
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Check Available Dates Online</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 860px;">
+  <div class="section-header">
+    <span class="section-tag">About</span>
+    <h1>Welcome to Freedom Park</h1>
+    <p style="color: var(--color-text-muted);">
+      A private sanctuary in Pernambut designed for family gatherings and celebrations.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl); line-height: 1.8;">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">The Freedom Park Story</h3>
+    <p>
+      Freedom Park was established with a singular vision: to give families in and around Pernambut a genuine, private haven to unwind, celebrate, and spend meaningful time together away from commercial distractions and public crowds.
+    </p>
+    <p>
+      Unlike conventional parks or public spaces where multiple groups overlap, Freedom Park operates on a strict <strong>One Day = One Booking</strong> model. When your family reserves a date, our gates are dedicated exclusively to you and your invited guests (up to 100 people) from 8:00 AM to 8:00 PM.
+    </p>
+  </div>
+
+  <div class="card" style="line-height: 1.8;">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Our Core Principles</h3>
+    <ul style="margin-left: 1.5rem; color: var(--color-text-muted); line-height: 2;">
+      <li><strong>Total Privacy:</strong> Only your group has access for the entire 12-hour booking duration.</li>
+      <li><strong>Natural Hospitality:</strong> Shaded trees, verdant lawns, and fresh air maintained with meticulous care.</li>
+      <li><strong>Family Security:</strong> Professional on-site security check-in ensures only verified guests enter.</li>
+      <li><strong>Honest Pricing:</strong> Flat day rate with zero hidden per-head surcharges.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-top: var(--space-xl); background: #F8FAF9; border-left: 4px solid var(--color-primary); line-height: 1.8;">
+    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-muted); font-weight: 600;">Leadership &amp; Vision</div>
+    <h3 style="margin: 0.25rem 0 0.75rem; color: var(--color-primary);">Founded by M. Asrar Ul Haq</h3>
+    <p style="margin: 0; font-size: 0.95rem; color: var(--color-text-muted);">
+      Freedom Park was conceived, created, and founded by <strong>M. Asrar Ul Haq</strong> with the dedication to provide families in Pernambut and surrounding communities an exclusive, safe, and scenic green sanctuary to gather, celebrate, and create cherished memories together in total privacy.
+    </p>
+  </div>
+
+  <div style="text-align: center; margin-top: var(--space-2xl);">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Plan Your Family Visit</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Partner Cancellation Requests — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="margin-bottom: var(--space-2xl);">
+    <span class="section-tag">Booking Operations</span>
+    <h1>Staff Partner Cancellation Requests</h1>
+    <p style="color: var(--color-text-muted);">
+      Staff Partners submit cancellation requests on behalf of their customers. Review details and approve or reject.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Request Date</th>
+            <th>Booking UID</th>
+            <th>Partner Name</th>
+            <th>Reason Provided</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+            <tr>
+              <td>{{ req.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+              <td style="font-family: var(--font-family-mono); font-weight: 700;">
+                <a href="{{ url_for('admin.bookings') }}?q={{ req.booking.booking_uid }}">{{ req.booking.booking_uid }}</a>
+              </td>
+              <td>{{ req.requester.full_name }}</td>
+              <td style="max-width: 250px;">{{ req.reason }}</td>
+              <td>
+                {% if req.status == 'PENDING' %}
+                  <span class="badge badge-warning">Awaiting Review</span>
+                {% elif req.status == 'APPROVED' %}
+                  <span class="badge badge-success">Approved &amp; Cancelled</span>
+                {% else %}
+                  <span class="badge badge-danger">Rejected</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if req.status == 'PENDING' %}
+                  <div style="display: flex; gap: 0.5rem;">
+                    <form method="POST" action="{{ url_for('admin.review_cancellation', id=req.id) }}" onsubmit="return confirm('Approve cancellation? This will cancel the booking and calculate refund according to policy.');" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="approve">
+                      <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.review_cancellation', id=req.id) }}" onsubmit="return confirm('Reject cancellation request?');" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="reject">
+                      <button type="submit" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger);">Reject</button>
+                    </form>
+                  </div>
+                {% else %}
+                  <small style="color: var(--color-text-muted);">Reviewed by {{ req.reviewer.full_name if req.reviewer else 'Admin' }}</small>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+                No cancellation requests recorded.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

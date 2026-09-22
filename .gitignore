@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+instance/
+
+# Environment secrets
+.env
+.env.local
+
+# Testing / Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Static / Uploads
+uploads/
+!uploads/.gitkeep
+
+# IDEs
+.vscode/*
+!.vscode/launch.json
+.idea/
+*.swp
+
+.vercel

@@ -1,0 +1,47 @@
+<header class="site-navbar{% if request.endpoint == 'public.index' %} site-navbar-hero{% endif %}">
+  <div class="container navbar-container">
+    <a href="{{ url_for('public.index') }}" class="brand-logo brand-logo-v4" title="Freedom Park Pernambut">
+      <span class="brand-leaf">⌁</span>
+      <span class="brand-wordmark">{{ get_setting('park_name', 'Freedom Park')|title }}<small>{{ get_setting('brand_subtitle', 'A UNIT OF MOOKANE MUQTHAR SAHIB PARK') }}</small></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('public.index') }}" class="nav-link">Home</a></li>
+      <li><a href="{{ url_for('public.about') }}" class="nav-link">About</a></li>
+      <li><a href="{{ url_for('public.activities') }}" class="nav-link">Activities</a></li>
+      <li><a href="{{ url_for('public.facilities') }}" class="nav-link">Facilities</a></li>
+      <li><a href="{{ url_for('public.pricing') }}" class="nav-link">Pricing</a></li>
+      <li><a href="{{ url_for('public.rules') }}" class="nav-link">Rules</a></li>
+      <li><a href="{{ url_for('public.gallery') }}" class="nav-link">Gallery</a></li>
+      <li><a href="{{ url_for('public.contact') }}" class="nav-link">Contact</a></li>
+      {% if not current_user.is_authenticated %}
+        <li class="staff-login-nav"><a href="{{ url_for('auth.staff_login') }}" class="nav-link nav-staff-login">Staff Login</a></li>
+      {% endif %}
+    </ul>
+
+    <div class="nav-actions{% if current_user.is_authenticated %} nav-actions-authenticated{% endif %}">
+      {% if current_user.is_authenticated %}
+        {% if current_user.role == 'CUSTOMER' %}
+          <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary btn-sm">My Bookings</a>
+          <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-sm">Book Date</a>
+        {% elif current_user.role == 'SUPER_ADMIN' %}
+          <a href="{{ url_for('admin.super_dashboard') }}" class="btn btn-secondary btn-sm">System Administrator</a>
+        {% elif current_user.role == 'ADMIN' %}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">Owner Console</a>
+        {% elif current_user.is_staff_partner %}
+          <a href="{{ url_for('staff.dashboard') }}" class="btn btn-secondary btn-sm">Staff Portal</a>
+        {% elif current_user.is_security %}
+          <a href="{{ url_for('security_bp.dashboard') }}" class="btn btn-secondary btn-sm">Security Portal</a>
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm" title="Log Out">Sign Out</a>
+      {% else %}
+        <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-sm">BOOK NOW</a>
+      {% endif %}
+
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>

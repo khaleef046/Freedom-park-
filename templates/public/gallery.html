@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Photo Gallery — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="section-header">
+    <span class="section-tag">Gallery</span>
+    <h1>Glimpse into Freedom Park</h1>
+    <p style="color: var(--color-text-muted);">
+      Explore our lush lawns, recreational spaces, and serene spots.
+    </p>
+  </div>
+
+  {% if photos %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-xl);">
+      {% for p in photos %}
+        <div class="card" style="padding: 0; overflow: hidden;">
+          <img src="{{ p.image_path }}" alt="{{ p.title }}" style="width: 100%; height: 240px; object-fit: cover;" loading="lazy">
+          <div style="padding: var(--space-md);">
+            <h4>{{ p.title }}</h4>
+            {% if p.body %}<p style="color: var(--color-text-muted); font-size: 0.88rem; margin: 0;">{{ p.body }}</p>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <!-- Professional placeholder showcase -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl); max-width: 900px; margin: 0 auto;">
+      <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; background: var(--color-surface-alt);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🌿</div>
+        <h4>Lush Green Lawns</h4>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">Spacious manicured gardens for outdoor relaxation and kids' games.</p>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; background: var(--color-surface-alt);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🏏</div>
+        <h4>Recreation & Sports Field</h4>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">Grass pitch equipped for cricket, badminton, and outdoor family fun.</p>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; background: var(--color-surface-alt);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🏡</div>
+        <h4>Covered Pavilions</h4>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">Comfortable dining and seating areas sheltered from the sun.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <div style="text-align: center; margin-top: var(--space-3xl);">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Book Your Visit Now</a>
+  </div>
+</div>
+{% endblock %}

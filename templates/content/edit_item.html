@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if item else 'Add' }} Content Item — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 620px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">CMS Editor</span>
+      <h2>{{ 'Edit' if item else 'Add New' }} Content Item</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Publish content directly to the public website without coding.
+      </p>
+    </div>
+
+    <form method="POST" action="{% if item %}{{ url_for('content_bp.edit_item', id=item.id) }}{% else %}{{ url_for('content_bp.add_item') }}{% endif %}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="content_type" class="form-label">Category</label>
+        <select id="content_type" name="content_type" class="form-select" required {% if item %}disabled{% endif %}>
+          <option value="gallery" {% if (item and item.content_type == 'gallery') or prefill_type == 'gallery' %}selected{% endif %}>Gallery Photo</option>
+          <option value="activity" {% if (item and item.content_type == 'activity') or prefill_type == 'activity' %}selected{% endif %}>Activity / Sport</option>
+          <option value="facility" {% if (item and item.content_type == 'facility') or prefill_type == 'facility' %}selected{% endif %}>Facility / Amenity</option>
+          <option value="rule" {% if (item and item.content_type == 'rule') or prefill_type == 'rule' %}selected{% endif %}>Park Rule / Policy</option>
+          <option value="announcement" {% if (item and item.content_type == 'announcement') or prefill_type == 'announcement' %}selected{% endif %}>Special Announcement</option>
+        </select>
+        {% if item %}<input type="hidden" name="content_type" value="{{ item.content_type }}">{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="title" class="form-label">Item Title</label>
+        <input type="text" id="title" name="title" class="form-control" required value="{{ item.title if item else '' }}" placeholder="e.g., Shaded Dining Gazebo">
+      </div>
+
+      <div class="form-group">
+        <label for="body" class="form-label">Description / Details</label>
+        <textarea id="body" name="body" class="form-control" rows="3" placeholder="Brief summary displayed on the website...">{{ item.body if item else '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="image_path" class="form-label">Image URL / File Path</label>
+        <input type="text" id="image_path" name="image_path" class="form-control" value="{{ item.image_path if item else '' }}" placeholder="https://... or /static/images/...">
+        <div class="form-hint">Direct URL or relative static path to image.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="display_order" class="form-label">Display Order</label>
+        <input type="number" id="display_order" name="display_order" class="form-control" value="{{ item.display_order if item else 0 }}">
+        <div class="form-hint">Lower numbers display first.</div>
+      </div>
+
+      {% if item %}
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="is_active" value="1" {% if item.is_active %}checked{% endif %}>
+            <span>Item is Visible on Website</span>
+          </label>
+        </div>
+      {% endif %}
+
+      <div style="display: flex; gap: var(--space-md);">
+        <a href="{{ url_for('content_bp.dashboard', type=item.content_type if item else prefill_type) }}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg" style="flex: 2;">Save Content Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

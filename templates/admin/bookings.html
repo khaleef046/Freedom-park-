@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Bookings — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--space-xl);">
+    <div>
+      <span class="section-tag">Central Database</span>
+      <h1 style="margin-bottom: 0.25rem;">All Bookings</h1>
+      <p style="color: var(--color-text-muted); margin: 0;">Single source of truth across website, phone, WhatsApp, and staff partners.</p>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <a href="{{ url_for('admin.export_bookings', file_format='xlsx', q=search_query, status=current_status, source=current_source) }}" class="btn btn-secondary btn-sm">↓ Excel</a>
+      <a href="{{ url_for('admin.export_bookings', file_format='csv', q=search_query, status=current_status, source=current_source) }}" class="btn btn-secondary btn-sm">↓ CSV</a>
+      <a href="{{ url_for('admin.manual_booking') }}" class="btn btn-primary btn-sm">+ Create Manual Booking</a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card" style="margin-bottom: var(--space-xl); padding: var(--space-lg);">
+    <form method="GET" action="{{ url_for('admin.bookings') }}" style="display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: flex-end;">
+      <div style="flex: 2; min-width: 220px;">
+        <label for="q" class="form-label">Search Bookings</label>
+        <input type="text" id="q" name="q" class="form-control" placeholder="Customer name, phone, or FP-2026-XXXX" value="{{ search_query or '' }}">
+      </div>
+
+      <div style="flex: 1; min-width: 140px;">
+        <label for="status" class="form-label">Status</label>
+        <select id="status" name="status" class="form-select">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+            <option value="{{ st }}" {% if current_status == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="flex: 1; min-width: 140px;">
+        <label for="source" class="form-label">Source</label>
+        <select id="source" name="source" class="form-select">
+          <option value="">All Sources</option>
+          {% for src in sources %}
+            <option value="{{ src }}" {% if current_source == src %}selected{% endif %}>{{ src }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('admin.bookings') }}" class="btn btn-secondary">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bookings Data Table -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Booking UID</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Guests</th>
+            <th>Amount</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+            <tr>
+              <td style="font-family: var(--font-family-mono); font-weight: 700;">{{ b.booking_uid }}</td>
+              <td>
+                <strong>{{ format_date_long(b.booking_date) }}</strong>
+                {% if b.is_past %}<br><small style="color: var(--color-past);">(Past)</small>{% endif %}
+              </td>
+              <td>
+                <strong>{{ b.customer_name }}</strong><br>
+                <small style="color: var(--color-text-muted);">📞 {{ b.customer_phone }}</small>
+              </td>
+              <td>{{ b.num_people }} / 100</td>
+              <td><strong>{{ format_currency(b.amount) }}</strong></td>
+              <td><span class="badge badge-info">{{ b.source }}</span></td>
+              <td>
+                {% if b.status == 'CONFIRMED' %}
+                  <span class="badge badge-success">Confirmed</span>
+                {% elif b.status == 'PENDING_PAYMENT' %}
+                  <span class="badge badge-warning">Pending Payment</span>
+                {% elif b.status == 'CANCELLED' %}
+                  <span class="badge badge-danger">Cancelled</span>
+                {% elif b.status == 'COMPLETED' %}
+                  <span class="badge badge-info">Completed</span>
+                {% else %}
+                  <span class="badge badge-secondary">{{ b.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if b.status == 'CONFIRMED' %}
+                  <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('cancelModal_{{ b.id }}').style.display='flex'">
+                    Cancel
+                  </button>
+
+                  <!-- Cancel Dialog Modal -->
+                  <div id="cancelModal_{{ b.id }}" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+                    <div class="card" style="max-width: 460px; width: 90%;">
+                      <h3>Cancel Booking {{ b.booking_uid }}?</h3>
+                      <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+                        Date: <strong>{{ format_date_long(b.booking_date) }}</strong><br>
+                        Customer: <strong>{{ b.customer_name }}</strong>
+                      </p>
+                      <form method="POST" action="{{ url_for('admin.cancel_booking', id=b.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="form-group">
+                          <label class="form-label">Reason for Cancellation</label>
+                          <textarea name="reason" class="form-control" rows="2" required placeholder="e.g., Customer requested via phone, maintenance"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem;">
+                            <input type="checkbox" name="is_park_fault" value="1">
+                            <span>Park-side cancellation (applies 100% full refund policy)</span>
+                          </label>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('cancelModal_{{ b.id }}').style.display='none'">Dismiss</button>
+                          <button type="submit" class="btn btn-danger btn-sm">Confirm Cancellation</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+                No matching bookings found.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

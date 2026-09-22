@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Cancellation — Freedom Park Staff Partner{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 540px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="background: var(--color-warning-soft); color: var(--color-warning); margin-bottom: 0.5rem;">Admin Review Required</span>
+      <h2>Request Booking Cancellation</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Booking: <strong>{{ booking.booking_uid }}</strong> on {{ format_date_long(booking.booking_date) }}
+      </p>
+    </div>
+
+    <div style="background-color: var(--color-surface-alt); padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      <div><strong>Customer:</strong> {{ booking.customer_name }}</div>
+      <div><strong>Phone:</strong> {{ booking.customer_phone }}</div>
+      <div><strong>Amount:</strong> {{ format_currency(booking.amount) }}</div>
+    </div>
+
+    <form method="POST" action="{{ url_for('staff.request_cancellation', booking_id=booking.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="reason" class="form-label">Detailed Reason for Cancellation</label>
+        <textarea id="reason" name="reason" class="form-control" rows="4" required placeholder="Explain why the customer requested cancellation or why the reservation cannot proceed..."></textarea>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
+        Note: Staff Partners cannot directly release booked dates. Owner/Admin will review your request and approve the cancellation.
+      </div>
+
+      <div style="display: flex; gap: var(--space-md);">
+        <a href="{{ url_for('staff.dashboard') }}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+        <button type="submit" class="btn btn-danger" style="flex: 2;">Submit Request to Admin</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

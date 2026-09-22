@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}System Administrator Control Center — Freedom Park{% endblock %}
+{% block content %}
+<div class="container section dashboard-shell">
+  <header class="dashboard-hero">
+    <div>
+      <span class="section-tag">SYSTEM CONTROL CENTER</span>
+      <h1>System Administrator</h1>
+      <p>Control the Freedom Park platform, access, business rules and operations.</p>
+    </div>
+    <div class="dashboard-identity"><strong>{{ current_user.full_name }}</strong><span>{{ current_user.formatted_staff_id }}</span></div>
+  </header>
+
+  {% if cancellation_requests or unresolved_complaints or equipment_reports or support_tickets %}
+  <section class="attention-panel">
+    <div><strong>Attention required</strong><span>Items waiting for review</span></div>
+    <div class="attention-actions">
+      {% if cancellation_requests %}<a href="{{ url_for('admin.cancellations_list') }}">{{ cancellation_requests|length }} cancellations</a>{% endif %}
+      {% if unresolved_complaints %}<a href="{{ url_for('admin.complaints') }}">{{ unresolved_complaints|length }} complaints</a>{% endif %}
+      {% if equipment_reports %}<a href="{{ url_for('admin.equipment_reports') }}">{{ equipment_reports|length }} equipment reports</a>{% endif %}
+      {% if support_tickets %}<span>{{ support_tickets|length }} support tickets</span>{% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="task-section">
+    <div class="task-section-heading"><div><span class="section-tag">SYSTEM RESPONSIBILITIES</span><h2>What do you need to manage?</h2></div><span class="task-hint">Choose a responsibility to open its task page.</span></div>
+    <div class="task-grid">
+      <a class="task-card task-primary" href="{{ url_for('admin.bookings') }}"><span class="task-icon">📋</span><div><h3>Bookings</h3><p>View, search and manage every reservation.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.staff_management') }}"><span class="task-icon">👥</span><div><h3>Staff &amp; Members</h3><p>Create accounts, roles, status and password resets.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.calendar_view') }}"><span class="task-icon">📅</span><div><h3>Calendar &amp; Availability</h3><p>See locked dates and manage availability.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.pricing') }}"><span class="task-icon">💰</span><div><h3>Pricing</h3><p>Control weekday and weekend day rates.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.cancellations_list') }}"><span class="task-icon">↩️</span><div><h3>Refunds &amp; Cancellations</h3><p>Review requests and manage booking cancellations.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.notifications_view') }}"><span class="task-icon">🔔</span><div><h3>Notifications</h3><p>Review operational alerts and follow-ups.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.settings') }}"><span class="task-icon">⚙️</span><div><h3>System Settings</h3><p>Business rules, capacity, hours, contact and policies.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.audit_logs') }}"><span class="task-icon">📜</span><div><h3>Audit</h3><p>Track important changes and system activity.</p></div><span class="task-arrow">→</span></a>
+      <a class="task-card" href="{{ url_for('admin.reports') }}"><span class="task-icon">📊</span><div><h3>Reports &amp; Analytics</h3><p>Review booking trends, sources and revenue.</p></div><span class="task-arrow">→</span></a>
+    <a class="task-card" href="{{ url_for('admin.homepage_editor') }}"><span class="task-icon">🌿</span><div><h3>Homepage &amp; Gallery</h3><p>Edit hero text, brand line and homepage gallery presentation.</p></div><span class="task-arrow">→</span></a>
+    </div>
+  </section>
+
+  <section class="quick-status">
+    <div><span>Confirmed bookings</span><strong>{{ confirmed_count }}</strong></div>
+    <div><span>Pending payments</span><strong>{{ pending_count }}</strong></div>
+    <div><span>Active staff</span><strong>{{ active_staff }} / {{ total_staff }}</strong></div>
+    <div><span>Total revenue</span><strong>{{ format_currency(total_revenue) }}</strong></div>
+  </section>
+
+  {% if current_user.has_permission("CONTENT_MANAGEMENT") %}<section class="content-access">
+    <a href="{{ url_for('content_bp.dashboard') }}"><span class="content-mark">✦</span><div><strong>Content Management</strong><small>Gallery, activities, facilities and announcements</small></div><span>→</span></a>
+  </section>{% endif %}
+</div>
+{% endblock %}

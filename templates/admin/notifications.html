@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications Center — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 800px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: var(--space-2xl);">
+    <div>
+      <span class="section-tag">System Alerts</span>
+      <h1 style="margin-bottom: 0.25rem;">Notification Center</h1>
+      <p style="color: var(--color-text-muted); margin: 0;">
+        Internal notices, booking alerts, and operational updates.
+      </p>
+    </div>
+
+    <div>
+      <form method="POST" action="{{ url_for('admin.mark_all_notifications_read') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-secondary btn-sm">Mark All as Read</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+      {% for notif in notifications %}
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem; border-radius: var(--radius-md); background: {% if not notif.is_read %}var(--color-primary-soft){% else %}var(--color-surface-alt){% endif %}; border: 1px solid var(--color-border);">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+              <span class="badge {% if notif.priority == 'URGENT' %}badge-danger{% elif notif.priority == 'IMPORTANT' %}badge-warning{% else %}badge-info{% endif %}">
+                {{ notif.type }}
+              </span>
+              <strong style="color: var(--color-text-main); font-size: 0.95rem;">{{ notif.title }}</strong>
+            </div>
+            <p style="color: var(--color-text-main); margin: 0 0 0.5rem 0; font-size: 0.9rem; line-height: 1.4;">
+              {{ notif.message }}
+            </p>
+            <small style="color: var(--color-text-muted);">{{ notif.created_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+            <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+              {% if notif.reference_type == 'staff_support' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.support_tickets') }}">Respond</a>
+              {% elif notif.reference_type == 'cancellation_request' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.cancellations_list') }}">Review</a>
+              {% elif notif.reference_type == 'booking' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.bookings') }}">View Booking</a>
+              {% elif notif.reference_type == 'equipment' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.equipment_reports') }}">Review</a>
+              {% elif notif.type == 'COMPLAINT' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.complaints') }}">Review</a>
+              {% elif notif.type == 'FEEDBACK' %}<a class="btn btn-primary btn-sm" href="{{ url_for('admin.feedback_list') }}">Review</a>{% endif %}
+            </div>
+          </div>
+
+          {% if not notif.is_read %}
+            <span class="badge badge-primary" style="font-size: 0.72rem;">New</span>
+          {% endif %}
+        </div>
+      {% else %}
+        <div style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+          You have no notifications. All caught up!
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: freedom-park-booking
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/prepare_render.py && gunicorn --bind 0.0.0.0:$PORT "run:app"
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OTP_MOCK_MODE
+        value: "false"
+      - key: DATABASE_URL
+        sync: false

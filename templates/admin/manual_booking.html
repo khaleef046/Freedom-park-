@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Manual Booking — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 600px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Direct Reservation</span>
+      <h2>Create Manual Booking</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Use this form when Mama or staff receives reservations via phone call, WhatsApp, or in person.
+        Once created, the date is immediately locked across all channels.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.manual_booking') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="booking_date" class="form-label">Booking Date</label>
+        <input type="date" id="booking_date" name="booking_date" class="form-control" required value="{{ prefill_date or '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="customer_name" class="form-label">Customer / Family Name</label>
+        <input type="text" id="customer_name" name="customer_name" class="form-control" required placeholder="e.g., Tariq Ahmed">
+      </div>
+
+      <div class="form-group">
+        <label for="customer_phone" class="form-label">Phone / WhatsApp Number</label>
+        <input type="tel" id="customer_phone" name="customer_phone" class="form-control" required placeholder="10-digit mobile number">
+      </div>
+
+      <div class="form-group">
+        <label for="num_people" class="form-label">Number of People (Max 100)</label>
+        <input type="number" id="num_people" name="num_people" class="form-control" required min="1" max="100" value="30">
+      </div>
+
+      <div class="form-group">
+        <label for="source" class="form-label">Booking Source</label>
+        <select id="source" name="source" class="form-select" required>
+          <option value="PHONE" selected>Phone Call</option>
+          <option value="WHATSAPP">WhatsApp</option>
+          <option value="ADMIN">Admin / Walk-In</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="custom_amount" class="form-label">Payment Amount (₹) — Leave blank for default rate</label>
+        <input type="number" id="custom_amount" name="custom_amount" class="form-control" step="100" placeholder="Optional custom price override">
+        <div class="form-hint">Defaults to configured weekday (₹2,000) or weekend (₹3,000) price.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes" class="form-label">Internal Notes / Event Type</label>
+        <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="e.g., Deposit received via cash/UPI, family reunion"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Confirm &amp; Lock Date &rarr;</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

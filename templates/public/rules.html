@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Park Rules & Guidelines — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 860px;">
+  <div class="section-header">
+    <span class="section-tag">Guidelines</span>
+    <h1>Freedom Park Rules & Policies</h1>
+    <p style="color: var(--color-text-muted);">
+      To ensure the safety, cleanliness, and peace of all guests, please review our park guidelines.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl);">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">General Park Guidelines</h3>
+    <ul style="margin-left: 1.5rem; color: var(--color-text-muted); line-height: 2;">
+      <li><strong>Operating Hours:</strong> 8:00 AM to 8:00 PM. All activities and checkouts must conclude by 8:00 PM.</li>
+      <li><strong>Maximum Capacity:</strong> 100 guests per booking. Overcrowding beyond 100 persons is strictly prohibited.</li>
+      <li><strong>Sole Booking Policy:</strong> The booking is for your private party only. Entry of uninvited individuals is restricted.</li>
+      <li><strong>Sports & Play Equipment:</strong> Equipment provided during check-in must be returned in good condition during checkout. Any missing or damaged items will be documented.</li>
+      <li><strong>Cleanliness & Environment:</strong> Please keep the park grounds clean. Waste disposal bins are placed throughout the premises.</li>
+      <li><strong>Safety:</strong> Children should be supervised near sports areas.</li>
+    </ul>
+  </div>
+
+  {% if rules %}
+    <div class="card">
+      <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Additional House Rules</h3>
+      <ul style="margin-left: 1.5rem; color: var(--color-text-muted); line-height: 2;">
+        {% for r in rules %}
+          <li><strong>{{ r.title }}:</strong> {{ r.body }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div style="text-align: center; margin-top: var(--space-2xl);">
+    <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-lg">Book Your Private Date</a>
+  </div>
+</div>
+{% endblock %}

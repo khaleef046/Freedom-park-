@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if step == 2 %}Step 2: Guest Details — Freedom Park{% else %}Step 1: Choose Date — Freedom Park{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 820px;">
+  <!-- Progress Stepper (5 Steps) -->
+  <div class="booking-stepper">
+    <div class="step-item {% if step >= 1 %}step-active{% endif %} {% if step > 1 %}step-done{% endif %}">
+      <span class="step-num">{% if step > 1 %}✓{% else %}1{% endif %}</span>
+      <span class="step-label">Date</span>
+    </div>
+    <div class="step-line {% if step > 1 %}step-line-done{% endif %}"></div>
+    <div class="step-item {% if step >= 2 %}step-active{% endif %}">
+      <span class="step-num">2</span>
+      <span class="step-label">Details</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <span class="step-num">3</span>
+      <span class="step-label">Review</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <span class="step-num">4</span>
+      <span class="step-label">Payment</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <span class="step-num">5</span>
+      <span class="step-label">Confirmed</span>
+    </div>
+  </div>
+
+  {% if step == 2 %}
+    <!-- ==========================================================================
+         STEP 2: GUEST DETAILS FORM
+         ========================================================================== -->
+    <div class="section-header">
+      <span class="section-tag">Step 2 of 5</span>
+      <h1>Guest &amp; Contact Details</h1>
+      <p style="color: var(--color-text-muted);">
+        Enter the primary guest details for your private reservation at Freedom Park.
+      </p>
+    </div>
+
+    <div class="card" style="box-shadow: var(--shadow-md);">
+      <!-- Selected Date Confirmation Ribbon -->
+      <div style="background: var(--color-primary-soft); border-left: 5px solid var(--color-primary); padding: 1rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--color-text-muted);">Selected Booking Date</span>
+          <div style="font-size: 1.25rem; font-weight: 800; color: var(--color-primary);">
+            {{ format_date_long(target_date) if target_date else selected_date }}
+          </div>
+          <small style="color: var(--color-text-muted);">8:00 AM – 8:00 PM &bull; {{ 'Weekend' if is_weekend else 'Weekday' }} Rate: <strong>{{ format_currency(price) }}</strong></small>
+        </div>
+        <a href="{{ url_for('customer.book') }}" class="btn btn-outline btn-sm" style="font-size: 0.82rem;">Change Date</a>
+      </div>
+
+      <form method="POST" action="{{ url_for('customer.book') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="partner_code" value="{{ partner_code or request.args.get('partner', '') }}">
+        <input type="hidden" name="booking_date" value="{{ selected_date }}">
+
+        <div class="form-group">
+          <label for="customer_name" class="form-label">Full Name of Primary Guest</label>
+          <input type="text" id="customer_name" name="customer_name" class="form-control" required value="{{ current_user.name or '' }}" placeholder="e.g., Mohamed Imran">
+          <div class="form-hint">Booking pass will be issued under this name.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="customer_phone" class="form-label">Contact Mobile / WhatsApp Number</label>
+          <input type="tel" id="customer_phone" name="customer_phone" class="form-control" required value="{{ current_user.phone or '' }}" placeholder="10-digit mobile number">
+          <div class="form-hint">Confirmation QR pass and entry pass link will be sent to this number.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="num_people" class="form-label">Estimated Guest Count (1 to 100)</label>
+          <input type="number" id="num_people" name="num_people" class="form-control" required min="1" max="100" value="25">
+          <div class="form-hint">Strict maximum limit of 100 guests per booking. Flat rate applies regardless of guest count.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="special_requests" class="form-label">Event Type or Special Notes (Optional)</label>
+          <textarea id="special_requests" name="special_requests" class="form-control" rows="2" placeholder="e.g., Family get-together, birthday lunch, kids cricket match"></textarea>
+        </div>
+
+        <div style="display: flex; gap: var(--space-md); margin-top: 1.5rem;">
+          <a href="{{ url_for('customer.book') }}" class="btn btn-secondary" style="flex: 1; text-align: center;">&larr; Back</a>
+          <button type="submit" class="btn btn-primary btn-lg" style="flex: 2;">
+            Review Reservation &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+
+  {% else %}
+    <!-- ==========================================================================
+         STEP 1: DEDICATED CALENDAR DATE SELECTION
+         ========================================================================== -->
+    <div class="section-header">
+      <span class="section-tag">Step 1 of 5</span>
+      <h1>Select an Available Date</h1>
+      <p style="color: var(--color-text-muted);">
+        Freedom Park is exclusively reserved for one family or group per day. Pick any open green date below.
+      </p>
+    </div>
+
+    <div class="card" style="box-shadow: var(--shadow-md); padding: var(--space-xl);">
+      <div id="bookingCalendar" class="calendar-widget" style="max-width: 100%;"></div>
+
+      <!-- Live Selection Floating Panel -->
+      <div id="dateSelectPanel" style="display: none; margin-top: 1.5rem; padding: 1.25rem; background: var(--color-primary-soft); border-radius: var(--radius-md); border-left: 4px solid var(--color-primary); align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--color-text-muted);">Selected Date:</span>
+          <div id="selectedDateDisplay" style="font-size: 1.35rem; font-weight: 800; color: var(--color-primary);"></div>
+          <small id="selectedPriceDisplay" style="color: var(--color-text-muted);"></small>
+        </div>
+        <a id="continueBtn" href="#" class="btn btn-primary btn-lg" style="min-width: 200px; text-align: center;">
+          Continue to Step 2 &rarr;
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if step == 1 %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const panel = document.getElementById("dateSelectPanel");
+    const dateDisplay = document.getElementById("selectedDateDisplay");
+    const priceDisplay = document.getElementById("selectedPriceDisplay");
+    const continueBtn = document.getElementById("continueBtn");
+
+    new FreedomCalendar("bookingCalendar", {
+      onDateSelected: (dateStr, status, price) => {
+        if (status === "AVAILABLE") {
+          panel.style.display = "flex";
+          dateDisplay.textContent = dateStr;
+          priceDisplay.textContent = `Rate: ₹${Number(price).toLocaleString()} • 8:00 AM – 8:00 PM`;
+          continueBtn.href = `{{ url_for('customer.book') }}?step=2&date=${dateStr}`;
+          continueBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          panel.style.display = "none";
+        }
+      }
+    });
+  });
+</script>
+{% endif %}
+{% endblock %}

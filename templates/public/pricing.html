@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Pricing & Policies — Freedom Park Pernambut{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="section-header">
+    <span class="section-tag">Pricing & Booking</span>
+    <h1>Transparent Fixed Pricing</h1>
+    <p style="color: var(--color-text-muted);">
+      One flat day rate for private exclusive use of Freedom Park. Capacity up to 100 people.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-2xl); max-width: 860px; margin: 0 auto var(--space-3xl) auto;">
+    <div class="card" style="border-top: 5px solid var(--color-primary-light);">
+      <span class="badge badge-info" style="margin-bottom: 0.5rem;">Weekdays (Mon – Fri)</span>
+      <h2>{{ format_currency(get_setting_decimal('weekday_price', 2000)) }}</h2>
+      <p style="color: var(--color-text-muted);">Full Day: 8:00 AM – 8:00 PM</p>
+      <ul style="list-style: none; margin: 1.5rem 0; font-size: 0.95rem; line-height: 2;">
+        <li>✓ Entire park private access</li>
+        <li>✓ Up to 100 guests</li>
+        <li>✓ Sports equipment provided at check-in</li>
+        <li>✓ Verified QR entry ticket</li>
+      </ul>
+      <a href="{{ url_for('customer.book') }}" class="btn btn-secondary btn-block">Book Weekday</a>
+    </div>
+
+    <div class="card" style="border-top: 5px solid var(--color-accent); box-shadow: var(--shadow-md);">
+      <span class="badge badge-success" style="margin-bottom: 0.5rem;">Weekends (Sat & Sun)</span>
+      <h2>{{ format_currency(get_setting_decimal('weekend_price', 3000)) }}</h2>
+      <p style="color: var(--color-text-muted);">Full Day: 8:00 AM – 8:00 PM</p>
+      <ul style="list-style: none; margin: 1.5rem 0; font-size: 0.95rem; line-height: 2;">
+        <li>✓ Entire park private access</li>
+        <li>✓ Up to 100 guests</li>
+        <li>✓ Ideal for family celebrations & reunions</li>
+        <li>✓ Sports equipment provided at check-in</li>
+      </ul>
+      <a href="{{ url_for('customer.book') }}" class="btn btn-primary btn-block">Book Weekend</a>
+    </div>
+  </div>
+
+  <!-- Detailed Cancellation Policy Section -->
+  <div id="cancellation" class="card" style="max-width: 860px; margin: 0 auto; background-color: var(--color-surface);">
+    <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Official Cancellation & Refund Policy</h3>
+    <div style="background-color: var(--color-primary-soft); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+      <p style="font-weight: 600; color: var(--color-primary); margin-bottom: 0;">
+        {{ get_setting('cancellation_policy_text') }}
+      </p>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Policy Details:</h4>
+    <ul style="margin-left: 1.5rem; color: var(--color-text-muted); line-height: 1.8;">
+      <li><strong>Customer Cancellations &ge; {{ get_setting_int('customer_cancel_threshold_hours', 24) }} hours before booking:</strong> Eligible for a {{ get_setting('customer_cancel_refund_before', '50') }}% refund.</li>
+      <li><strong>Customer Cancellations &lt; {{ get_setting_int('customer_cancel_threshold_hours', 24) }} hours before booking:</strong> 0% refund (as the private date was reserved exclusively).</li>
+      <li><strong>Park-Side Cancellations:</strong> If Freedom Park must cancel due to maintenance or unavoidable technical reasons, a <strong>100% full refund</strong> is immediately processed.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

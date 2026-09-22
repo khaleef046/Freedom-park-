@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment Incident Reports — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="margin-bottom: var(--space-2xl);">
+    <span class="section-tag">Gate Operations</span>
+    <h1>Equipment Incident Reports</h1>
+    <p style="color: var(--color-text-muted);">
+      Discrepancies, damages, and missing equipment recorded during guest checkout by security guards.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date &amp; Time</th>
+            <th>Booking UID</th>
+            <th>Equipment Item</th>
+            <th>Quantity</th>
+            <th>Issue Type</th>
+            <th>Reported By</th>
+            <th>Security Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rep in reports %}
+            <tr>
+              <td>{{ rep.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+              <td style="font-family: var(--font-family-mono); font-weight: 700;">
+                <a href="{{ url_for('admin.bookings') }}?q={{ rep.booking.booking_uid }}">{{ rep.booking.booking_uid }}</a>
+              </td>
+              <td><strong>{{ rep.equipment.name }}</strong></td>
+              <td>{{ rep.quantity }} unit(s)</td>
+              <td>
+                <span class="badge {% if rep.status == 'MISSING' %}badge-danger{% else %}badge-warning{% endif %}">
+                  {{ rep.status }}
+                </span>
+              </td>
+              <td>{{ rep.reporter.full_name if rep.reporter else 'Security' }}</td>
+              <td>{{ rep.note or '—' }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+                No equipment loss or damage incidents reported. All sports equipment accounted for.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

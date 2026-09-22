@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Pricing Rules — Freedom Park Admin{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 600px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem;">Configurable Rates</span>
+      <h2>Dynamic Pricing Settings</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Prices are fixed per day for the entire private park (up to 100 guests). Updating here changes rates across the entire booking engine immediately.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.pricing') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="weekday_price" class="form-label">Weekday Price (Monday – Friday) in ₹</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <span style="display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-weight: 700;">₹</span>
+          <input type="number" id="weekday_price" name="weekday_price" class="form-control" required min="500" step="100" value="{{ weekday_price }}" style="font-weight: 700; font-size: 1.1rem;">
+        </div>
+        <div class="form-hint">Standard weekday rate for 12 hours (8:00 AM – 8:00 PM).</div>
+      </div>
+
+      <div class="form-group">
+        <label for="weekend_price" class="form-label">Weekend Price (Saturday &amp; Sunday) in ₹</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <span style="display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-weight: 700;">₹</span>
+          <input type="number" id="weekend_price" name="weekend_price" class="form-control" required min="500" step="100" value="{{ weekend_price }}" style="font-weight: 700; font-size: 1.1rem;">
+        </div>
+        <div class="form-hint">Prime weekend rate for 12 hours (8:00 AM – 8:00 PM).</div>
+      </div>
+
+      <div style="background-color: var(--color-primary-soft); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.88rem; color: var(--color-text-main);">
+        💡 <strong>Audit Notice:</strong> Changes made here are saved with your user ID into the system audit log. Existing confirmed bookings preserve their original confirmed price.
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Save New Pricing Rates</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

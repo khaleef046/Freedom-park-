@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}500 — Server Notice | Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 540px; text-align: center;">
+  <div class="card" style="padding: var(--space-3xl) var(--space-xl);">
+    <div style="font-size: 3.5rem; color: var(--color-danger); margin-bottom: 1rem;">⚙️</div>
+    <h1>Service Notice</h1>
+    <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">
+      We encountered an unexpected technical issue. Our administration has been alerted. Please try again shortly.
+    </p>
+    <a href="{{ url_for('public.index') }}" class="btn btn-primary">&larr; Return to Homepage</a>
+  </div>
+</div>
+{% endblock %}

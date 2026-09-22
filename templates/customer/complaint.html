@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Report an Issue / Complaint — Freedom Park{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width: 580px;">
+  <div class="card" style="box-shadow: var(--shadow-md);">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <span class="section-tag" style="margin-bottom: 0.5rem; background: var(--color-danger-soft); color: var(--color-danger);">Direct Resolution</span>
+      <h2>Report a Problem</h2>
+      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
+        Park administration reviews complaints directly to ensure high standards.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('customer.submit_complaint') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="booking_uid" class="form-label">Booking Reference (Optional)</label>
+        <input type="text" id="booking_uid" name="booking_uid" class="form-control" placeholder="e.g., FP-2026-0001">
+      </div>
+
+      <div class="form-group">
+        <label for="category" class="form-label">Issue Category</label>
+        <select id="category" name="category" class="form-select" required>
+          <option value="Facility Problem">Facility or Amenity Problem</option>
+          <option value="Equipment Problem">Sports / Game Equipment Issue</option>
+          <option value="Staff Issue">Staff or Security Concern</option>
+          <option value="Cleanliness">Cleanliness or Hygiene</option>
+          <option value="Booking Problem">Booking / Date Scheduling Concern</option>
+          <option value="Payment Problem">Payment or Transaction Query</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="priority" class="form-label">Urgency</label>
+        <select id="priority" name="priority" class="form-select">
+          <option value="NORMAL" selected>Normal Inquiry / Feedback</option>
+          <option value="HIGH">Important — Requires Prompt Attention</option>
+          <option value="URGENT">Urgent — Immediate Concern</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="message" class="form-label">Detailed Description of Problem</label>
+        <textarea id="message" name="message" class="form-control" rows="5" required placeholder="Please describe what occurred so our management team can investigate and resolve it..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-danger btn-block btn-lg">Submit Report to Management</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
