@@ -1,6 +1,8 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 import pytest
+from sqlalchemy import extract
+from sqlalchemy.dialects import postgresql
 from app.extensions import db
 from app.models.booking import Booking, BookingStatus, BookingSource, BlockedDate
 from app.models.user import Customer, User
@@ -84,6 +86,50 @@ def test_booking_creation_and_sandbox_payment(app):
         available, a_msg = BookingService.is_date_available(target_date)
         assert available is False
         assert "already been booked" in a_msg
+
+
+def test_booking_uid_year_count_is_database_independent(app):
+    with app.app_context():
+        current_year = date.today().year
+        booking = Booking(
+            booking_uid="FP-TEST-YEAR-COUNT",
+            booking_date=date.today() + timedelta(days=1),
+            customer_name="Year Count Test",
+            customer_phone="9876543210",
+            num_people=1,
+            amount=Decimal("2000.00"),
+            status=BookingStatus.CANCELLED,
+            source=BookingSource.ADMIN,
+            created_at=datetime(current_year, 6, 15),
+        )
+        db.session.add(booking)
+        db.session.flush()
+
+        count = db.session.query(db.func.count(Booking.id)).filter(
+            extract("year", Booking.created_at) == current_year
+        ).scalar()
+
+        assert count == 1
+
+
+def test_booking_year_expression_compiles_for_postgresql():
+    expression = extract("year", Booking.created_at) == 2026
+    compiled = str(expression.compile(dialect=postgresql.dialect()))
+
+    assert "strftime" not in compiled.lower()
+    assert "EXTRACT(year FROM bookings.created_at)" in compiled
+
+
+def test_booking_calendar_month_expressions_compile_for_postgresql():
+    expression = (
+        (extract("year", Booking.booking_date) == 2026)
+        & (extract("month", Booking.booking_date) == 9)
+    )
+    compiled = str(expression.compile(dialect=postgresql.dialect()))
+
+    assert "strftime" not in compiled.lower()
+    assert "EXTRACT(year FROM bookings.booking_date)" in compiled
+    assert "EXTRACT(month FROM bookings.booking_date)" in compiled
 
 
 def test_prevent_double_booking_same_date(app):

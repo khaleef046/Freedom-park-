@@ -2,7 +2,7 @@ import calendar
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from typing import Optional, Tuple, List, Dict
-from sqlalchemy import func, or_
+from sqlalchemy import extract, func, or_
 from app.extensions import db
 from app.models.booking import Booking, BlockedDate, BookingStatus, BookingSource
 from app.models.payment import Payment, PaymentStatus, PaymentMode
@@ -107,7 +107,7 @@ class BookingService:
     def _next_booking_uid(cls, year: int) -> str:
         """Generate next sequence UID, e.g. FP-2026-0001."""
         count = db.session.query(func.count(Booking.id)).filter(
-            func.strftime("%Y", Booking.created_at) == str(year)
+            extract("year", Booking.created_at) == year
         ).scalar() or 0
         return generate_booking_uid(year, count + 1)
 

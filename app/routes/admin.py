@@ -3,7 +3,7 @@ import json
 from decimal import Decimal
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file
 from flask_login import login_required, current_user
-from sqlalchemy import func
+from sqlalchemy import extract, func
 from app.extensions import db
 from app.models.booking import Booking, BlockedDate, BookingStatus, BookingSource
 from app.models.payment import Payment, PaymentStatus
@@ -269,14 +269,16 @@ def calendar_view():
     
     # Map bookings for easy lookup
     bookings_in_month = Booking.query.filter(
-        func.strftime("%Y-%m", Booking.booking_date) == f"{year:04d}-{month:02d}",
+        extract("year", Booking.booking_date) == year,
+        extract("month", Booking.booking_date) == month,
         Booking.status.in_(BookingStatus.ACTIVE_STATUSES),
     ).all()
     booking_map = {b.booking_date.isoformat(): b for b in bookings_in_month}
 
     # Blocked dates map
     blocked_in_month = BlockedDate.query.filter(
-        func.strftime("%Y-%m", BlockedDate.blocked_date) == f"{year:04d}-{month:02d}"
+        extract("year", BlockedDate.blocked_date) == year,
+        extract("month", BlockedDate.blocked_date) == month,
     ).all()
     blocked_map = {bd.blocked_date.isoformat(): bd for bd in blocked_in_month}
 
