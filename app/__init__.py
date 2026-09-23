@@ -3,7 +3,7 @@ from flask import Flask, render_template
 from sqlalchemy import event, inspect, text
 from sqlalchemy.engine import Engine
 from app.config import get_config
-from app.extensions import db, login_manager, csrf, migrate
+from app.extensions import db, login_manager, csrf, migrate, oauth
 from app.utils.helpers import format_currency, format_date_long, format_time_12hr
 
 
@@ -27,6 +27,14 @@ def create_app(config_name: str = None) -> Flask:
     login_manager.init_app(app)
     csrf.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+    oauth.init_app(app)
+    oauth.register(
+        name="google",
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_id=app.config.get("GOOGLE_CLIENT_ID"),
+        client_secret=app.config.get("GOOGLE_CLIENT_SECRET"),
+        client_kwargs={"scope": "openid email profile"},
+    )
 
     # Configure login manager
     login_manager.login_view = "auth.staff_login"

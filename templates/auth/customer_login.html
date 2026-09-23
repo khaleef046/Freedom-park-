@@ -1,16 +1,36 @@
 {% extends 'base.html' %}
 {% block title %}Customer Booking Details — Freedom Park{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer-login.css') }}">
+{% endblock %}
 {% block content %}
-<div class="container section" style="max-width: 520px;">
-  <div class="card customer-entry-card">
-    <div class="entry-heading"><span class="section-tag">QUICK BOOKING</span><h2>Tell us who is booking</h2><p>Enter your name and mobile number to continue. No OTP is required.</p></div>
+<div class="customer-login-page">
+  <div class="customer-login-card">
+    <div class="customer-login-accent customer-login-accent-left" aria-hidden="true"></div>
+    <div class="customer-login-accent customer-login-accent-right" aria-hidden="true"></div>
+    <div class="customer-login-content">
+      <div class="customer-login-logo" aria-label="Freedom Park">
+        <span class="customer-login-logo-mark" aria-hidden="true">⌁</span>
+        <span class="customer-login-logo-name">Freedom Park</span>
+      </div>
+      <div class="customer-login-heading">
+        <h1>Welcome Back</h1>
+        <p>Enter your details to continue your booking.</p>
+      </div>
     <form method="POST" action="{{ url_for('auth.customer_login', next=request.args.get('next')) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="form-group"><label for="name" class="form-label">Full Name</label><input type="text" id="name" name="name" class="form-control" required maxlength="120" autocomplete="name" placeholder="Your name"></div>
-      <div class="form-group"><label for="phone" class="form-label">Mobile Number</label><div class="phone-entry"><span>+91</span><input type="tel" id="phone" name="phone" class="form-control" required pattern="[6-9][0-9]{9}" maxlength="10" inputmode="numeric" autocomplete="tel" placeholder="9876543210"></div><div class="form-hint">Use a number you can be reached on for booking-related communication.</div></div>
-      <button type="submit" class="btn btn-primary btn-block btn-lg">Continue to Booking →</button>
+      <div class="form-group customer-login-field"><label for="name" class="form-label">Full Name</label><input type="text" id="name" name="name" class="form-control" required maxlength="120" autocomplete="name" placeholder="Your name"></div>
+      <div class="form-group customer-login-field"><label for="phone" class="form-label">Mobile Number</label><div class="phone-entry"><span>+91</span><input type="tel" id="phone" name="phone" class="form-control" required pattern="[6-9][0-9]{9}" maxlength="10" inputmode="numeric" autocomplete="tel" placeholder="9876543210"></div></div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg customer-login-primary">Continue to Booking <span aria-hidden="true">→</span></button>
     </form>
+    <div class="customer-login-divider"><span>OR</span></div>
+    <a class="btn btn-block btn-lg customer-login-google" href="{{ url_for('auth.google_login', next=request.args.get('next')) }}">
+      <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.75 9.75 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.84 3.21 14.63 2.25 12 2.25a9.75 9.75 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>
+      Continue with Google
+    </a>
+    <p class="customer-login-security"><span aria-hidden="true">&#10003;</span> Your information is safe and secure</p>
     <div class="staff-entry-note">Park Staff or Administrator? <a href="{{ url_for('auth.staff_login') }}">Staff Login →</a></div>
+    </div>
   </div>
 </div>
 {% endblock %}

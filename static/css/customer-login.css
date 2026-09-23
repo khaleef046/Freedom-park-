@@ -1,0 +1,96 @@
+.customer-login-page {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - var(--navbar-height));
+  padding: clamp(2rem, 6vw, 5rem) 1rem;
+  overflow: hidden;
+  background: #f2f7f1;
+}
+
+.customer-login-card {
+  position: relative;
+  width: min(100%, 500px);
+  overflow: hidden;
+  border: 1px solid rgba(46, 94, 66, .12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .97);
+  box-shadow: 0 20px 55px rgba(28, 67, 45, .12), 0 3px 10px rgba(28, 67, 45, .05);
+}
+
+.customer-login-content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(2rem, 6vw, 3.25rem);
+}
+
+.customer-login-accent {
+  position: absolute;
+  width: 118px;
+  height: 58px;
+  border: 1px solid rgba(64, 145, 108, .16);
+  border-radius: 100% 0 100% 0;
+  background: rgba(216, 243, 220, .42);
+  transform: rotate(-24deg);
+}
+
+.customer-login-accent-left { top: -16px; left: -32px; }
+.customer-login-accent-right { right: -40px; bottom: -18px; transform: rotate(156deg); }
+
+.customer-login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  margin-bottom: 2.25rem;
+  color: var(--color-primary);
+}
+
+.customer-login-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.45rem;
+  line-height: 1;
+  transform: rotate(-45deg);
+}
+
+.customer-login-logo-mark::first-letter { transform: rotate(45deg); }
+
+.customer-login-logo-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.customer-login-heading { margin-bottom: 2rem; text-align: center; }
+.customer-login-heading h1 { margin-bottom: .55rem; font-size: clamp(1.8rem, 4vw, 2.2rem); color: #183d2b; }
+.customer-login-heading p { margin: 0; color: var(--color-text-muted); font-size: .98rem; }
+.customer-login-field { margin-bottom: 1.2rem; }
+.customer-login-field .form-label { margin-bottom: .5rem; font-size: .85rem; }
+.customer-login-field .form-control { min-height: 52px; border-color: #dce8de; border-radius: 11px; background: #fbfdfb; }
+.customer-login-field .form-control::placeholder { color: #9aa9a0; }
+.customer-login-field .form-control:focus { border-color: var(--color-accent); box-shadow: 0 0 0 4px rgba(64, 145, 108, .13); background: #fff; }
+.customer-login-field .phone-entry { gap: .6rem; }
+.customer-login-field .phone-entry > span { min-height: 52px; padding: 0 1rem; border-color: #dce8de; border-radius: 11px; background: #f1f7f1; color: var(--color-primary); }
+.customer-login-primary { min-height: 54px; margin-top: .4rem; border-radius: 11px; box-shadow: 0 8px 18px rgba(27, 67, 50, .16); }
+.customer-login-primary span { font-size: 1.2rem; line-height: 1; }
+.customer-login-divider { display: flex; align-items: center; gap: .9rem; margin: 1.7rem 0; color: #93a198; font-size: .72rem; font-weight: 700; letter-spacing: .14em; }
+.customer-login-divider::before, .customer-login-divider::after { content: ""; height: 1px; flex: 1; background: #e2eae3; }
+.customer-login-google { min-height: 52px; border: 1px solid #dce5de; border-radius: 11px; background: #fff; color: #27352e; box-shadow: 0 2px 5px rgba(28, 67, 45, .04); }
+.customer-login-google:hover { border-color: #b7d1be; background: #fbfdfb; color: #183d2b; box-shadow: 0 5px 12px rgba(28, 67, 45, .08); }
+.customer-login-google svg { width: 20px; height: 20px; flex: 0 0 20px; }
+.customer-login-security { display: flex; justify-content: center; gap: .4rem; margin: 1.7rem 0 0; color: #789080; font-size: .78rem; }
+.customer-login-security span { color: var(--color-accent); font-weight: 800; }
+.customer-login-card .staff-entry-note { margin-top: 1.25rem; padding-top: 1.1rem; border-top-color: #edf2ee; font-size: .78rem; }
+
+@media (max-width: 520px) {
+  .customer-login-page { min-height: calc(100vh - var(--navbar-height)); padding: 1.25rem .75rem 2rem; }
+  .customer-login-content { padding: 2rem 1.25rem 1.75rem; }
+  .customer-login-logo { margin-bottom: 1.8rem; }
+  .customer-login-heading { margin-bottom: 1.7rem; }
+}

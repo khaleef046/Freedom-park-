@@ -1,4 +1,4 @@
-from app.models.user import User, Customer, Role
+from app.models.user import User, Customer, CustomerIdentity, Role
 from app.models.booking import Booking, BlockedDate, BookingStatus, BookingSource
 from app.models.payment import Payment, PaymentStatus, PaymentMode
 from app.models.setting import Setting, SettingCategory
@@ -19,6 +19,7 @@ from app.models.audit_log import AuditLog, AuditAction
 __all__ = [
     "User",
     "Customer",
+    "CustomerIdentity",
     "Role",
     "Booking",
     "BlockedDate",

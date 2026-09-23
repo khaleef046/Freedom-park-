@@ -116,7 +116,7 @@ class Customer(UserMixin, db.Model):
     __tablename__ = "customers"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), unique=True, nullable=True, index=True)
     name: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     whatsapp: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -128,6 +128,7 @@ class Customer(UserMixin, db.Model):
     bookings = relationship("Booking", back_populates="customer", cascade="all, delete-orphan")
     feedback_list = relationship("Feedback", back_populates="customer", cascade="all, delete-orphan")
     complaints = relationship("Complaint", back_populates="customer", cascade="all, delete-orphan")
+    identities = relationship("CustomerIdentity", back_populates="customer", cascade="all, delete-orphan")
 
     def get_id(self) -> str:
         """Return prefixed ID for Flask-Login session management."""
@@ -142,3 +143,25 @@ class Customer(UserMixin, db.Model):
 
     def __repr__(self) -> str:
         return f"<Customer {self.phone} ({self.name})>"
+
+
+class CustomerIdentity(db.Model):
+    """External identity linked to a customer account."""
+    __tablename__ = "customer_identities"
+    __table_args__ = (
+        db.UniqueConstraint("provider", "provider_subject", name="uq_customer_identity_provider_subject"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    customer_id: Mapped[int] = mapped_column(Integer, ForeignKey("customers.id"), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    provider_subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, onupdate=datetime.utcnow, nullable=True)
+
+    customer = relationship("Customer", back_populates="identities")
+
+    def __repr__(self) -> str:
+        return f"<CustomerIdentity {self.provider}:{self.provider_subject}>"

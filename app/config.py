@@ -31,6 +31,11 @@ class BaseConfig:
     # OTP Authentication
     OTP_MOCK_MODE = False
     OTP_MOCK_CODE = os.environ.get("OTP_MOCK_CODE", "123456")
+
+    # Google OpenID Connect
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI")
     
     # Business Defaults (Fallback if not in DB settings)
     PARK_NAME = "FREEDOM PARK"
