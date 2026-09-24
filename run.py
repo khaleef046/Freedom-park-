@@ -3,6 +3,7 @@ import socket
 import sys
 from pathlib import Path
 
+import click
 from dotenv import load_dotenv
 
 # Load environment variables from .env
@@ -19,6 +20,26 @@ def seed():
     import seed
     seed.seed_all()
     print("Database seeding completed successfully.")
+
+
+@app.cli.command("reset-staff-password")
+@click.option("--username", prompt="Staff username", help="Username of the staff account to update.")
+def reset_staff_password(username):
+    """Set a new password for one existing staff account."""
+    from app.models.user import Role, User
+
+    with app.app_context():
+        user = User.query.filter_by(username=username.strip()).first()
+        if not user or user.role not in Role.STAFF_ROLES:
+            raise click.ClickException("No matching staff account was found.")
+
+        password = click.prompt("New password", hide_input=True, confirmation_prompt=True)
+        if len(password) < 8:
+            raise click.ClickException("Password must be at least 8 characters long.")
+
+        user.set_password(password)
+        db.session.commit()
+        click.echo(f"Password updated for staff account '{user.username}'.")
 
 def get_local_ip():
     """Detect local LAN IPv4 address for mobile device testing."""

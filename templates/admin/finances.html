@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Income &amp; Expenditure - Freedom Park{% endblock %}
+{% block content %}
+<div class="container section dashboard-shell">
+  <header class="dashboard-hero">
+    <div><span class="section-tag">BUSINESS FINANCE</span><h1>Income &amp; Expenditure</h1><p>Track booking income, operating expenses and net profit or loss.</p></div>
+    <div class="dashboard-identity"><strong>{{ current_user.full_name }}</strong><span>{{ 'System Administrator' if current_user.role == Role.SUPER_ADMIN else 'Owner / Admin' }}</span></div>
+  </header>
+
+  <section class="card" style="box-shadow: var(--shadow-md);">
+    <form method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
+      <div class="form-group"><label class="form-label" for="month">Month</label><input class="form-control" type="month" id="month" name="month" value="{{ month }}"></div>
+      <div class="form-group"><label class="form-label" for="start_date">Start date</label><input class="form-control" type="date" id="start_date" name="start_date" value="{{ start_date }}"></div>
+      <div class="form-group"><label class="form-label" for="end_date">End date</label><input class="form-control" type="date" id="end_date" name="end_date" value="{{ end_date }}"></div>
+      <button class="btn btn-primary" type="submit">Apply filter</button>
+      <a class="btn btn-secondary" href="{{ url_for('admin.finances') }}">Clear</a>
+    </form>
+  </section>
+
+  <section class="quick-status" style="margin-top: 1.25rem;">
+    <div><span>Total income</span><strong>{{ format_currency(total_income) }}</strong></div>
+    <div><span>Total expenditure</span><strong>{{ format_currency(total_expenditure) }}</strong></div>
+    <div><span>Net profit/loss</span><strong>{{ format_currency(net_profit_loss) }}</strong></div>
+  </section>
+
+  <section class="card" style="box-shadow: var(--shadow-md); margin-top: 1.25rem;">
+    <div class="list-heading"><div><span class="section-tag">EXPENDITURE</span><h2>Add expenditure</h2></div></div>
+    <form method="post" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; align-items: end;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label class="form-label" for="expense_date">Date</label><input class="form-control" type="date" id="expense_date" name="expense_date" required></div>
+      <div class="form-group"><label class="form-label" for="category">Category</label><select class="form-control" id="category" name="category" required>{% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label class="form-label" for="amount">Amount</label><input class="form-control" type="number" min="0.01" step="0.01" id="amount" name="amount" required></div>
+      <div class="form-group"><label class="form-label" for="description">Description</label><input class="form-control" type="text" id="description" name="description" maxlength="500"></div>
+      <button class="btn btn-primary" type="submit">Add expenditure</button>
+    </form>
+  </section>
+
+  <section class="card dashboard-list" style="margin-top: 1.25rem;">
+    <div class="list-heading"><div><span class="section-tag">RECORDS</span><h2>Expenditure records</h2></div></div>
+    <div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Actions</th></tr></thead><tbody>
+      {% for item in expenditures %}<tr><td>{{ format_date_long(item.expense_date) }}</td><td>{{ item.category }}</td><td>{{ format_currency(item.amount) }}</td><td>{{ item.description or '—' }}</td><td><details><summary>Edit</summary><form method="post" action="{{ url_for('admin.edit_expenditure', id=item.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input class="form-control" type="date" name="expense_date" value="{{ item.expense_date.isoformat() }}" required><select class="form-control" name="category" required>{% for category in categories %}<option value="{{ category }}" {% if category == item.category %}selected{% endif %}>{{ category }}</option>{% endfor %}</select><input class="form-control" type="number" name="amount" min="0.01" step="0.01" value="{{ item.amount }}" required><input class="form-control" type="text" name="description" value="{{ item.description or '' }}"><button class="btn btn-primary btn-sm" type="submit">Save</button></form><form method="post" action="{{ url_for('admin.delete_expenditure', id=item.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline btn-sm" type="submit">Delete</button></form></details></td></tr>{% else %}<tr><td colspan="5" class="empty-state">No expenditure records for this period.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

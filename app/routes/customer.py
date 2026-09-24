@@ -12,6 +12,7 @@ from app.services.payment_service import PaymentService
 from app.services.qr_service import QRService
 from app.services.settings_service import SettingsService
 from app.services.notification_service import NotificationService
+from app.services.feedback_service import FeedbackService
 from app.utils.decorators import customer_required
 
 customer_bp = Blueprint("customer", __name__)
@@ -27,9 +28,21 @@ def dashboard():
 
     today = date.today()
     upcoming = [b for b in bookings if b.booking_date >= today and b.status == BookingStatus.CONFIRMED]
-    completed = [b for b in bookings if b.booking_date < today or b.status == BookingStatus.COMPLETED]
+    completed = [
+        b for b in bookings
+        if b.booking_date < today
+        or b.status == BookingStatus.COMPLETED
+        or FeedbackService.is_eligible(b)
+    ]
     cancelled = [b for b in bookings if b.status == BookingStatus.CANCELLED]
     pending = [b for b in bookings if b.status == BookingStatus.PENDING_PAYMENT and b.booking_date >= today]
+    feedback_states = {
+        booking.id: {
+            "eligible": FeedbackService.is_eligible(booking),
+            "submitted": FeedbackService.has_feedback(booking),
+        }
+        for booking in completed
+    }
 
     return render_template(
         "customer/dashboard.html",
@@ -37,6 +50,7 @@ def dashboard():
         completed=completed,
         cancelled=cancelled,
         pending=pending,
+        feedback_states=feedback_states,
     )
 
 
@@ -217,7 +231,7 @@ def confirmation(booking_uid: str):
         booking_uid=booking_uid, customer_id=current_user.id
     ).first_or_404()
 
-    qr_data_uri = QRService.generate_booking_qr_svg_uri(booking.booking_uid)
+    qr_data_uri = QRService.generate_guest_hub_qr_svg_uri(booking.booking_uid)
     return render_template("customer/confirmation.html", booking=booking, qr_data_uri=qr_data_uri)
 
 
@@ -229,7 +243,7 @@ def digital_pass(booking_uid: str):
         booking_uid=booking_uid, customer_id=current_user.id
     ).first_or_404()
 
-    qr_data_uri = QRService.generate_booking_qr_svg_uri(booking.booking_uid)
+    qr_data_uri = QRService.generate_guest_hub_qr_svg_uri(booking.booking_uid)
     return render_template("customer/digital_pass.html", booking=booking, qr_data_uri=qr_data_uri)
 
 
@@ -258,26 +272,44 @@ def cancel_booking(booking_uid: str):
 @customer_bp.route("/feedback/<booking_uid>", methods=["GET", "POST"])
 @customer_required
 def submit_feedback(booking_uid: str):
-    """Submit post-visit feedback with 1-5 star rating and optional photo."""
+    """Submit post-visit feedback during the configured post-visit window."""
     booking = Booking.query.filter_by(
         booking_uid=booking_uid, customer_id=current_user.id
     ).first_or_404()
 
+    if not FeedbackService.is_eligible(booking) or FeedbackService.has_feedback(booking):
+        flash("Thank you for visiting Freedom Park.", "info")
+        return redirect(url_for("customer.dashboard"))
+
     if request.method == "POST":
-        rating = int(request.form.get("rating", "5"))
-        category = request.form.get("category", "Positive Feedback")
-        message = request.form.get("message", "")
+        try:
+            rating = int(request.form.get("rating", "0"))
+        except (TypeError, ValueError):
+            rating = 0
+        message = request.form.get("message", "").strip()
+        if rating not in range(1, 6):
+            flash("Please choose a rating.", "warning")
+            return render_template("customer/feedback.html", booking=booking, rating=rating)
+        if rating in (1, 2) and not message:
+            flash("Please tell us what we could do better.", "warning")
+            return render_template("customer/feedback.html", booking=booking, rating=rating)
 
         feedback = Feedback(
             customer_id=current_user.id,
             booking_id=booking.id,
-            category=category,
+            category="Positive Feedback" if rating >= 4 else "Improvement",
             rating=rating,
             message=message,
+            submitted_at=datetime.utcnow(),
         )
-        db.session.add(feedback)
-        db.session.commit()
-        flash("Thank you for sharing your feedback with Freedom Park!", "success")
+        try:
+            db.session.add(feedback)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash("Thank you for visiting Freedom Park.", "info")
+            return redirect(url_for("customer.dashboard"))
+        flash("Thank you for sharing your experience!", "success")
         return redirect(url_for("customer.dashboard"))
 
     return render_template("customer/feedback.html", booking=booking)

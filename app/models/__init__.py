@@ -15,6 +15,7 @@ from app.models.notification import Notification, NotificationPriority, Notifica
 from app.models.content import ContentItem, ContentType
 from app.models.cancellation import CancellationRequest, CancellationRequestStatus
 from app.models.audit_log import AuditLog, AuditAction
+from app.models.expenditure import Expenditure, ExpenditureCategory
 
 __all__ = [
     "User",
@@ -53,4 +54,6 @@ __all__ = [
     "CancellationRequestStatus",
     "AuditLog",
     "AuditAction",
+    "Expenditure",
+    "ExpenditureCategory",
 ]

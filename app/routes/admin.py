@@ -12,6 +12,7 @@ from app.models.feedback import Feedback, Complaint, FeedbackStatus, StaffSuppor
 from app.models.commission import CommissionRecord, CommissionStatus
 from app.models.notification import Notification
 from app.models.audit_log import AuditLog, AuditAction
+from app.models.expenditure import Expenditure, ExpenditureCategory
 from app.models.cancellation import CancellationRequest, CancellationRequestStatus
 from app.models.equipment import Equipment, EquipmentReport, EquipmentChecklist
 from app.services.booking_service import BookingService
@@ -78,6 +79,7 @@ def dashboard():
     total_revenue = db.session.query(func.sum(Booking.amount)).filter(
         Booking.status == BookingStatus.CONFIRMED
     ).scalar() or Decimal("0.00")
+    total_expenditure = db.session.query(func.sum(Expenditure.amount)).scalar() or Decimal("0.00")
 
     # Booking source distribution
     source_stats = {
@@ -109,6 +111,8 @@ def dashboard():
         total_bookings=total_bookings,
         total_cancelled=total_cancelled,
         total_revenue=total_revenue,
+        total_expenditure=total_expenditure,
+        net_profit_loss=total_revenue - total_expenditure,
         source_stats=source_stats,
         pending_complaints=pending_complaints,
         pending_cancellations=pending_cancellations,
@@ -506,8 +510,15 @@ def update_complaint(id: int):
 @admin_required
 def feedback_list():
     """Customer ratings and feedback list."""
-    all_feedback = Feedback.query.order_by(Feedback.created_at.desc()).all()
-    return render_template("admin/feedback.html", feedback_list=all_feedback)
+    all_feedback = Feedback.query.order_by(Feedback.submitted_at.desc()).all()
+    total_feedback = len(all_feedback)
+    average_rating = (sum(item.rating for item in all_feedback) / total_feedback) if total_feedback else 0
+    return render_template(
+        "admin/feedback.html",
+        feedback_list=all_feedback,
+        total_feedback=total_feedback,
+        average_rating=average_rating,
+    )
 
 
 @admin_bp.route("/reports")
@@ -530,7 +541,7 @@ def reports():
 def update_feedback(id: int):
     feedback = db.get_or_404(Feedback, id)
     status = request.form.get("status", feedback.status)
-    if status not in ("NEW", "REVIEWING", "RESOLVED", "CLOSED"): status = feedback.status
+    if status not in ("NEW", "REVIEWED"): status = feedback.status
     feedback.status = status
     feedback.admin_notes = request.form.get("admin_notes", "").strip() or feedback.admin_notes
     db.session.commit()
@@ -649,6 +660,110 @@ def staff_management():
         staff_members=staff_members,
         roles=roles,
     )
+
+
+def _financial_date_range():
+    """Return the optional inclusive date range selected in the finance view."""
+    month = request.args.get("month", "").strip()
+    start_value = request.args.get("start_date", "").strip()
+    end_value = request.args.get("end_date", "").strip()
+    start_date = end_date = None
+    try:
+        if month:
+            start_date = datetime.strptime(month, "%Y-%m").date().replace(day=1)
+            next_month = (start_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+            end_date = next_month - timedelta(days=1)
+        else:
+            if start_value:
+                start_date = datetime.strptime(start_value, "%Y-%m-%d").date()
+            if end_value:
+                end_date = datetime.strptime(end_value, "%Y-%m-%d").date()
+    except ValueError:
+        flash("Please select a valid financial date range.", "warning")
+    return start_date, end_date, month, start_value, end_value
+
+
+@admin_bp.route("/finances", methods=["GET", "POST"])
+@admin_required
+def finances():
+    """Income, expenditure, and profit/loss view for Admin and System Administrator."""
+    if request.method == "POST":
+        category = request.form.get("category", "").strip()
+        description = request.form.get("description", "").strip() or None
+        try:
+            expense_date = datetime.strptime(request.form.get("expense_date", ""), "%Y-%m-%d").date()
+            amount = Decimal(request.form.get("amount", "").strip())
+        except (ValueError, TypeError, ArithmeticError):
+            flash("Enter a valid date and expenditure amount.", "danger")
+            return redirect(url_for("admin.finances"))
+        if category not in ExpenditureCategory.ALL or amount <= 0:
+            flash("Choose a valid category and enter an amount greater than zero.", "danger")
+            return redirect(url_for("admin.finances"))
+        db.session.add(Expenditure(
+            expense_date=expense_date,
+            category=category,
+            amount=amount,
+            description=description,
+            created_by=current_user.id,
+        ))
+        db.session.commit()
+        flash("Expenditure recorded successfully.", "success")
+        return redirect(url_for("admin.finances"))
+
+    start_date, end_date, month, start_value, end_value = _financial_date_range()
+    income_query = Booking.query.filter(Booking.status == BookingStatus.CONFIRMED)
+    expenditure_query = Expenditure.query
+    if start_date:
+        income_query = income_query.filter(Booking.booking_date >= start_date)
+        expenditure_query = expenditure_query.filter(Expenditure.expense_date >= start_date)
+    if end_date:
+        income_query = income_query.filter(Booking.booking_date <= end_date)
+        expenditure_query = expenditure_query.filter(Expenditure.expense_date <= end_date)
+    total_income = income_query.with_entities(func.coalesce(func.sum(Booking.amount), 0)).scalar() or Decimal("0.00")
+    expenditures = expenditure_query.order_by(Expenditure.expense_date.desc(), Expenditure.id.desc()).all()
+    total_expenditure = sum((Decimal(str(item.amount)) for item in expenditures), Decimal("0.00"))
+    return render_template(
+        "admin/finances.html",
+        total_income=Decimal(str(total_income)),
+        total_expenditure=total_expenditure,
+        net_profit_loss=Decimal(str(total_income)) - total_expenditure,
+        expenditures=expenditures,
+        categories=ExpenditureCategory.ALL,
+        month=month,
+        start_date=start_value,
+        end_date=end_value,
+    )
+
+
+@admin_bp.route("/finances/<int:id>/edit", methods=["POST"])
+@admin_required
+def edit_expenditure(id: int):
+    expenditure = db.get_or_404(Expenditure, id)
+    try:
+        expenditure.expense_date = datetime.strptime(request.form.get("expense_date", ""), "%Y-%m-%d").date()
+        expenditure.amount = Decimal(request.form.get("amount", "").strip())
+    except (ValueError, TypeError, ArithmeticError):
+        flash("Enter a valid date and expenditure amount.", "danger")
+        return redirect(url_for("admin.finances"))
+    category = request.form.get("category", "").strip()
+    if category not in ExpenditureCategory.ALL or expenditure.amount <= 0:
+        flash("Choose a valid category and enter an amount greater than zero.", "danger")
+        return redirect(url_for("admin.finances"))
+    expenditure.category = category
+    expenditure.description = request.form.get("description", "").strip() or None
+    db.session.commit()
+    flash("Expenditure updated successfully.", "success")
+    return redirect(url_for("admin.finances"))
+
+
+@admin_bp.route("/finances/<int:id>/delete", methods=["POST"])
+@admin_required
+def delete_expenditure(id: int):
+    expenditure = db.get_or_404(Expenditure, id)
+    db.session.delete(expenditure)
+    db.session.commit()
+    flash("Expenditure deleted successfully.", "success")
+    return redirect(url_for("admin.finances"))
 
 
 @admin_bp.route("/staff/add", methods=["POST"])

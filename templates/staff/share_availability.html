@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Share Available Dates - Freedom Park{% endblock %}
+{% block content %}
+<div class="container section" style="max-width: 900px;">
+  <div class="section-header">
+    <span class="section-tag">STAFF PARTNER SHARING</span>
+    <h1>Available dates</h1>
+    <p style="color: var(--color-text-muted);">Share current booking availability with your customers.</p>
+  </div>
+
+  <section class="card" style="box-shadow: var(--shadow-md);">
+    <div class="section-header" style="margin-bottom: 1rem;">
+      <h2>Open dates</h2>
+      <p style="color: var(--color-text-muted);">Only future dates that are not booked or blocked are shown.</p>
+    </div>
+    {% if available %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem;">
+        {% for item in available %}
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem;">
+            <strong>{{ item.date.strftime('%A, %d %b %Y') }}</strong>
+            <div style="color: var(--color-text-muted); margin-top: .35rem;">
+              {{ 'Weekend' if item.is_weekend else 'Weekday' }} rate
+            </div>
+            <strong style="display: block; color: var(--color-primary); margin-top: .35rem;">{{ format_currency(item.price) }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">There are no open dates in the current booking window.</p>
+    {% endif %}
+  </section>
+
+  <section class="card" style="box-shadow: var(--shadow-md); margin-top: 1.25rem;">
+    <div class="section-header" style="margin-bottom: 1rem;">
+      <h2>WhatsApp message</h2>
+      <p style="color: var(--color-text-muted);">This message contains dates and prices only. It does not include customer or booking details.</p>
+    </div>
+    <textarea class="form-control" rows="10" readonly aria-label="WhatsApp availability message">{{ share_message }}</textarea>
+    <div style="display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem;">
+      <a class="btn btn-primary" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Open in WhatsApp</a>
+      <button class="btn btn-outline" type="button" onclick="navigator.clipboard.writeText(document.querySelector('[aria-label=\"WhatsApp availability message\"]').value)">Copy message</button>
+      <a class="btn btn-secondary" href="{{ url_for('staff.dashboard') }}">Back to dashboard</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -51,6 +51,29 @@ def test_staff_login_http_route(client):
     assert "/admin" in res.location
 
 
+@pytest.mark.parametrize(
+    ("username", "role", "dashboard"),
+    [
+        ("test_superadmin", Role.SUPER_ADMIN, "/admin/super-dashboard"),
+        ("test_owner", Role.ADMIN, "/admin/dashboard"),
+        ("test_partner", Role.STAFF_PARTNER, "/staff/dashboard"),
+        ("test_security", Role.SECURITY, "/security/dashboard"),
+    ],
+)
+def test_staff_login_routes_all_roles(client, username, role, dashboard):
+    response = client.post(
+        "/auth/staff-login",
+        data={"username": username, "password": "pass123"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    assert response.location.endswith(dashboard)
+
+    dashboard_response = client.get(dashboard, follow_redirects=False)
+    assert dashboard_response.status_code != 302 or "/auth/staff-login" not in dashboard_response.location
+
+
 def _google_claims(subject="google-subject-1", email="person@example.com"):
     return {
         "iss": "https://accounts.google.com",

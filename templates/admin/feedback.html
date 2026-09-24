@@ -12,6 +12,11 @@
     </p>
   </div>
 
+  <section class="quick-status" style="margin-bottom: var(--space-xl);">
+    <div><span>Total feedback</span><strong>{{ total_feedback }}</strong></div>
+    <div><span>Average rating</span><strong>{{ '%.1f'|format(average_rating) }} / 5</strong></div>
+  </section>
+
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-lg);">
     {% for f in feedback_list %}
       <div class="card">
@@ -20,14 +25,15 @@
             {% for _ in range(f.rating) %}★{% endfor %}
             <span style="font-size: 0.85rem; color: var(--color-text-muted);">({{ f.rating }}/5)</span>
           </div>
-          <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{ f.created_at.strftime('%b %d, %Y') }}</span>
+          <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{ (f.submitted_at or f.created_at).strftime('%b %d, %Y') }}</span>
         </div>
         <h4 style="margin-bottom: 0.25rem;">{{ f.category }}</h4>
         <p style="color: var(--color-text-main); font-size: 0.95rem; margin-bottom: 0.75rem;">
           "{{ f.message }}"
         </p>
-        <form method="POST" action="{{ url_for('admin.update_feedback', id=f.id) }}" style="margin-top:.75rem"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><select name="status" class="form-select"><option {% if f.status=='NEW' %}selected{% endif %}>NEW</option><option {% if f.status=='REVIEWING' %}selected{% endif %}>REVIEWING</option><option {% if f.status=='RESOLVED' %}selected{% endif %}>RESOLVED</option><option {% if f.status=='CLOSED' %}selected{% endif %}>CLOSED</option></select><textarea name="admin_notes" class="form-control" rows="2" placeholder="Internal note">{{ f.admin_notes or '' }}</textarea><button class="btn btn-primary btn-sm" style="margin-top:.4rem">Save Review</button></form>
+        <form method="POST" action="{{ url_for('admin.update_feedback', id=f.id) }}" style="margin-top:.75rem"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><select name="status" class="form-select"><option {% if f.status=='NEW' %}selected{% endif %}>NEW</option><option {% if f.status=='REVIEWED' %}selected{% endif %}>REVIEWED</option></select><textarea name="admin_notes" class="form-control" rows="2" placeholder="Internal note">{{ f.admin_notes or '' }}</textarea><button class="btn btn-primary btn-sm" style="margin-top:.4rem">Save Review</button></form>
         <div style="font-size: 0.85rem; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 0.5rem;">
+          Customer: <strong>{{ f.customer.name if f.customer and f.customer.name else '—' }}</strong><br>
           Booking: <strong>{{ f.booking.booking_uid if f.booking else '—' }}</strong>
         </div>
       </div>

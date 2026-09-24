@@ -12,7 +12,7 @@
     </p>
     <div style="display: flex; justify-content: center; gap: var(--space-sm);">
       <a href="{{ url_for('public.index') }}" class="btn btn-outline">&larr; Return to Home</a>
-      <a href="{{ url_for('auth.staff_login') }}" class="btn btn-primary">Staff Login</a>
+      {% if not current_user.is_authenticated %}<a href="{{ url_for('auth.staff_login') }}" class="btn btn-primary">Staff Login</a>{% endif %}
     </div>
   </div>
 </div>

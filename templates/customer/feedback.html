@@ -7,45 +7,45 @@
   <div class="card" style="box-shadow: var(--shadow-md);">
     <div style="text-align: center; margin-bottom: 1.5rem;">
       <span class="section-tag" style="margin-bottom: 0.5rem;">Guest Feedback</span>
-      <h2>How Was Your Visit?</h2>
-      <p style="color: var(--color-text-muted); font-size: 0.9rem;">
-        Booking: <strong>{{ booking.booking_uid }}</strong> on {{ format_date_long(booking.booking_date) }}
-      </p>
+      <h2>How was your experience at Freedom Park?</h2>
     </div>
 
     <form method="POST" action="{{ url_for('customer.submit_feedback', booking_uid=booking.booking_uid) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      <div class="form-group">
-        <label for="rating" class="form-label">Overall Rating (1 to 5 Stars)</label>
-        <select id="rating" name="rating" class="form-select" required>
-          <option value="5" selected>⭐⭐⭐⭐⭐ 5 Stars — Outstanding Experience</option>
-          <option value="4">⭐⭐⭐⭐ 4 Stars — Very Good</option>
-          <option value="3">⭐⭐⭐ 3 Stars — Average / Satisfactory</option>
-          <option value="2">⭐⭐ 2 Stars — Needs Improvement</option>
-          <option value="1">⭐ 1 Star — Unsatisfactory</option>
-        </select>
-      </div>
+      <fieldset class="form-group" style="border: 0; padding: 0;">
+        <legend class="form-label">Your rating</legend>
+        <div style="display: grid; gap: .5rem;">
+          {% for value, label in [(1, 'Very Bad'), (2, 'Bad'), (3, 'Okay'), (4, 'Good'), (5, 'Very Good')] %}
+            <label style="display: flex; align-items: center; gap: .5rem;"><input type="radio" name="rating" value="{{ value }}" {% if (rating or 5) == value %}checked{% endif %} required> <span>{{ value }} star{{ '' if value == 1 else 's' }} - {{ label }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div id="feedback-prompt" style="padding: .85rem; margin-bottom: 1rem; background: var(--color-primary-soft); border-radius: var(--radius-md); color: var(--color-primary);">Thank you! ❤️</div>
 
       <div class="form-group">
-        <label for="category" class="form-label">Feedback Category</label>
-        <select id="category" name="category" class="form-select">
-          <option value="Positive Feedback">Positive Feedback</option>
-          <option value="Suggestion">Suggestion / Idea</option>
-          <option value="Improvement">Area for Improvement</option>
-          <option value="Facility Issue">Facility / Amenities</option>
-          <option value="Equipment Issue">Sports Equipment</option>
-          <option value="Other">Other</option>
-        </select>
+        <label for="message" class="form-label" id="message-label">Any suggestion to make your next visit even better?</label>
+        <textarea id="message" name="message" class="form-control" rows="4" placeholder="Your thoughts are welcome..."></textarea>
       </div>
 
-      <div class="form-group">
-        <label for="message" class="form-label">Your Message</label>
-        <textarea id="message" name="message" class="form-control" rows="4" required placeholder="Tell us about your family's experience at Freedom Park..."></textarea>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-block btn-lg">Submit Feedback &rarr;</button>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Share Feedback</button>
     </form>
   </div>
 </div>
+<script>
+  const ratingInputs = document.querySelectorAll('input[name="rating"]');
+  const prompt = document.getElementById('feedback-prompt');
+  const label = document.getElementById('message-label');
+  const message = document.getElementById('message');
+  function updateFeedbackFields() {
+    const rating = Number(document.querySelector('input[name="rating"]:checked')?.value || 5);
+    const needsReason = rating <= 2;
+    prompt.textContent = needsReason ? "We'd love to understand how we can improve." : "Thank you! ❤️";
+    label.textContent = needsReason ? "What could we do better?" : "Any suggestion to make your next visit even better?";
+    message.required = needsReason;
+  }
+  ratingInputs.forEach((input) => input.addEventListener('change', updateFeedbackFields));
+  updateFeedbackFields();
+</script>
 {% endblock %}

@@ -176,7 +176,21 @@ def ensure_compatibility_columns(app):
     """Add safe additive columns needed by newer builds to an existing SQLite DB."""
     with app.app_context():
         try:
+            from app.models.expenditure import Expenditure
+            from app.models.feedback import Feedback
+
+            Expenditure.__table__.create(bind=db.engine, checkfirst=True)
             inspector = inspect(db.engine)
+            if "feedback" in inspector.get_table_names():
+                feedback_columns = {c["name"] for c in inspector.get_columns("feedback")}
+                if "submitted_at" not in feedback_columns:
+                    with db.engine.begin() as conn:
+                        conn.execute(text("ALTER TABLE feedback ADD COLUMN submitted_at DATETIME"))
+                with db.engine.begin() as conn:
+                    conn.execute(text(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_feedback_booking "
+                        "ON feedback (booking_id) WHERE booking_id IS NOT NULL"
+                    ))
             if "users" in inspector.get_table_names():
                 cols = {c["name"] for c in inspector.get_columns("users")}
                 if "permissions" not in cols:

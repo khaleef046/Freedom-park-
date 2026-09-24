@@ -91,9 +91,18 @@
             <p style="color: var(--color-text-muted); font-size: 0.88rem;">
               👥 {{ b.num_people }} guests &bull; {{ format_currency(b.amount) }}
             </p>
-            <div style="display: flex; gap: var(--space-sm); margin-top: 0.75rem;">
-              <a href="{{ url_for('customer.submit_feedback', booking_uid=b.booking_uid) }}" class="btn btn-outline btn-sm">Leave Feedback ⭐</a>
-            </div>
+            {% set feedback_state = feedback_states.get(b.id, {}) %}
+            {% if feedback_state.submitted %}
+              <div class="card" style="margin-top: 1rem; background: var(--color-primary-soft); border: 0; padding: 1rem;">
+                <strong>Thank you for sharing your experience!</strong>
+              </div>
+            {% elif feedback_state.eligible %}
+              <div class="card" style="margin-top: 1rem; border-left: 4px solid var(--color-accent); padding: 1rem;">
+                <strong>How was your experience?</strong>
+                <p style="color: var(--color-text-muted); margin: .25rem 0 .75rem;">Share your feedback</p>
+                <a href="{{ url_for('customer.submit_feedback', booking_uid=b.booking_uid) }}" class="btn btn-outline btn-sm">Give Feedback</a>
+              </div>
+            {% endif %}
           </div>
         {% endfor %}
       </div>

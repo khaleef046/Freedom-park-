@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Integer, DateTime, Text, ForeignKey, CheckConstraint
+from sqlalchemy import String, Integer, DateTime, Text, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.extensions import db
 
@@ -19,6 +19,7 @@ class FeedbackCategory:
 
 class FeedbackStatus:
     NEW = "NEW"
+    REVIEWED = "REVIEWED"
     REVIEWING = "REVIEWING"
     RESOLVED = "RESOLVED"
     CLOSED = "CLOSED"
@@ -36,6 +37,7 @@ class Feedback(db.Model):
     __tablename__ = "feedback"
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 5", name="chk_feedback_rating"),
+        UniqueConstraint("booking_id", name="uq_feedback_booking"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -45,6 +47,7 @@ class Feedback(db.Model):
     category: Mapped[str] = mapped_column(String(50), default=FeedbackCategory.GENERAL if hasattr(FeedbackCategory, 'GENERAL') else FeedbackCategory.POSITIVE)
     rating: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     photo_path: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     status: Mapped[str] = mapped_column(String(20), default=FeedbackStatus.NEW)

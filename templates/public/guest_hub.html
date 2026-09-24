@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Guest Hub - Freedom Park Resort{% endblock %}
+{% block content %}
+<div class="container section" style="max-width: 520px; text-align: center;">
+  <div class="card" style="box-shadow: var(--shadow-md); padding: var(--space-2xl);">
+    <span class="section-tag">FREEDOM PARK RESORT</span>
+    <h1>How was your day?</h1>
+    <p style="color: var(--color-text-muted);">We would love to hear from you.</p>
+    {% if feedback_url %}<a class="btn btn-primary btn-lg btn-block" href="{{ feedback_url }}">Share Your Feedback</a>{% else %}<a class="btn btn-primary btn-lg btn-block" href="{{ url_for('auth.customer_login') }}">Share Your Feedback</a>{% endif %}
+    <div style="display: flex; justify-content: center; gap: .75rem; flex-wrap: wrap; margin-top: 1rem;">
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('customer.book') }}">Book Again</a>
+      <a class="btn btn-outline btn-sm" href="{{ url_for('public.index') }}">Visit Website</a>
+      <a class="btn btn-outline btn-sm" href="{{ url_for('public.contact') }}">Contact Us</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

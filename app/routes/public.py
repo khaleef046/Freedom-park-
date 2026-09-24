@@ -3,6 +3,7 @@ from app.models.content import ContentItem, ContentType
 from app.models.booking import Booking, BookingStatus
 from app.services.settings_service import SettingsService
 from app.services.booking_service import BookingService
+from app.services.feedback_service import FeedbackService
 
 public_bp = Blueprint("public", __name__)
 
@@ -136,3 +137,13 @@ def verify_ticket(booking_uid: str):
         booking=booking,
         is_valid=is_valid,
     )
+
+
+@public_bp.route("/guest-hub/<booking_uid>")
+def guest_hub(booking_uid: str):
+    """Public QR landing page without exposing booking or customer details."""
+    booking = Booking.query.filter_by(booking_uid=booking_uid.strip().upper()).first()
+    feedback_url = None
+    if booking and FeedbackService.is_eligible(booking) and not FeedbackService.has_feedback(booking):
+        feedback_url = url_for("customer.submit_feedback", booking_uid=booking.booking_uid)
+    return render_template("public/guest_hub.html", feedback_url=feedback_url)

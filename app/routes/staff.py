@@ -1,5 +1,6 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from decimal import Decimal
+from urllib.parse import quote
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from sqlalchemy import func
@@ -197,11 +198,40 @@ def support():
 def share_availability():
     """Return a WhatsApp-ready share page for currently available dates."""
     today = date.today()
-    end = today + __import__("datetime").timedelta(days=SettingsService.get_int("booking_window_days", 30))
+    end = today + timedelta(days=SettingsService.get_int("booking_window_days", 30))
     available = []
     d = today
     while d <= end:
-        if BookingService.is_date_available(d):
-            available.append(d)
-        d += __import__("datetime").timedelta(days=1)
-    return render_template("staff/share_availability.html", available=available[:20], referral_link=url_for("customer.book", partner=current_user.staff_id or current_user.formatted_staff_id, _external=True))
+        is_available, _ = BookingService.is_date_available(d)
+        if is_available:
+            available.append({
+                "date": d,
+                "weekday": d.strftime("%A"),
+                "price": BookingService.calculate_price_for_date(d),
+                "is_weekend": d.weekday() >= 5,
+            })
+        d += timedelta(days=1)
+
+    referral_link = url_for(
+        "customer.book",
+        partner=current_user.staff_id or current_user.formatted_staff_id,
+        _external=True,
+    )
+    lines = [
+        "Freedom Park availability",
+        "Book your private park day:"
+    ]
+    lines.extend(
+        f"{item['date'].strftime('%a, %d %b')} - {item['weekday']} rate: Rs. {item['price']:,.2f}"
+        for item in available
+    )
+    lines.extend(["", f"Book here: {referral_link}"])
+    share_message = "\n".join(lines)
+    whatsapp_url = f"https://wa.me/?text={quote(share_message)}"
+    return render_template(
+        "staff/share_availability.html",
+        available=available,
+        referral_link=referral_link,
+        share_message=share_message,
+        whatsapp_url=whatsapp_url,
+    )

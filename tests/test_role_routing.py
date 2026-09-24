@@ -1,7 +1,10 @@
 import pytest
 from datetime import date, timedelta
 from app.models.user import User, Role
+from app.models.booking import Booking, BookingSource, BookingStatus
+from app.models.expenditure import Expenditure
 from app.extensions import db
+from decimal import Decimal
 
 
 def test_super_admin_redirect_to_super_dashboard(client):
@@ -71,6 +74,74 @@ def test_owner_forbidden_from_staff_management(client):
     })
     res = client.get("/admin/staff")
     assert res.status_code == 403
+    assert b"Staff Login" not in res.data
+
+
+def test_staff_management_is_visible_only_to_super_admin(client):
+    client.post("/auth/staff-login", data={"username": "test_superadmin", "password": "pass123"})
+    response = client.get("/admin/dashboard")
+    assert response.status_code == 200
+    assert b"Staff" in response.data
+
+    client.get("/auth/logout")
+    client.post("/auth/staff-login", data={"username": "test_owner", "password": "pass123"})
+    response = client.get("/admin/dashboard")
+    assert response.status_code == 200
+    assert b"Manage staff accounts and access" not in response.data
+
+
+@pytest.mark.parametrize("username", ["test_partner", "test_security"])
+def test_non_admin_roles_cannot_access_finances(client, username):
+    client.post("/auth/staff-login", data={"username": username, "password": "pass123"})
+    assert client.get("/admin/finances").status_code == 403
+
+
+def test_admin_and_super_admin_can_access_finances_and_owner_can_manage_expenses(client, app):
+    with app.app_context():
+        booking = Booking(
+            booking_uid="FP-FINANCE-TEST",
+            booking_date=date.today(),
+            customer_name="Financial Test",
+            customer_phone="9000000000",
+            num_people=2,
+            amount=Decimal("2500.00"),
+            status=BookingStatus.CONFIRMED,
+            source=BookingSource.WEBSITE,
+        )
+        db.session.add(booking)
+        db.session.commit()
+
+    client.post("/auth/staff-login", data={"username": "test_owner", "password": "pass123"})
+    response = client.get("/admin/finances")
+    assert response.status_code == 200
+    assert b"2,500" in response.data
+
+    response = client.post("/admin/finances", data={
+        "expense_date": date.today().isoformat(),
+        "category": "Cleaning",
+        "amount": "400.00",
+        "description": "Monthly cleaning",
+    })
+    assert response.status_code == 302
+    with app.app_context():
+        expense = Expenditure.query.one()
+        expense_id = expense.id
+
+    response = client.post(f"/admin/finances/{expense_id}/edit", data={
+        "expense_date": date.today().isoformat(),
+        "category": "Supplies",
+        "amount": "450.00",
+        "description": "Updated supplies",
+    })
+    assert response.status_code == 302
+    response = client.post(f"/admin/finances/{expense_id}/delete")
+    assert response.status_code == 302
+    with app.app_context():
+        assert Expenditure.query.count() == 0
+
+    client.get("/auth/logout")
+    client.post("/auth/staff-login", data={"username": "test_superadmin", "password": "pass123"})
+    assert client.get("/admin/finances").status_code == 200
 
 
 def test_user_staff_id_property(app):

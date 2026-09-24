@@ -28,6 +28,16 @@ class QRService:
             return ""
 
     @staticmethod
+    def generate_guest_hub_qr_svg_uri(booking_uid: str) -> str:
+        """Generate the guest-facing QR landing page for a booking pass."""
+        try:
+            payload = url_for("public.guest_hub", booking_uid=booking_uid, _external=True)
+            qr = segno.make_qr(payload, error="M")
+            return qr.svg_data_uri(scale=5, border=2, dark="#1B4332", light="#FFFFFF")
+        except Exception:
+            return ""
+
+    @staticmethod
     def generate_booking_qr_svg_string(booking_uid: str) -> str:
         """Returns raw SVG markup string for direct HTML injection."""
         try:

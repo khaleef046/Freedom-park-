@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from sqlalchemy.engine import make_url
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 
@@ -50,6 +51,17 @@ def get_db_uri():
         # Render may provide the legacy postgres:// scheme.
         if database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+
+        parsed_url = make_url(database_url)
+        if (
+            parsed_url.drivername.startswith("sqlite")
+            and parsed_url.database
+            and parsed_url.database != ":memory:"
+            and not Path(parsed_url.database).is_absolute()
+        ):
+            database_path = (BASE_DIR / parsed_url.database).resolve()
+            return parsed_url.set(database=database_path.as_posix()).render_as_string(hide_password=False)
+
         return database_url
     db_file = os.path.join(BASE_DIR, "freedom_park.db")
     return f"sqlite:///{db_file}"
