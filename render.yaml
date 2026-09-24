@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt && flask --app run:app db upgrade && python scripts/prepare_render.py
-    startCommand: gunicorn --bind 0.0.0.0:$PORT run:app
+    startCommand: gunicorn wsgi:app
     healthCheckPath: /
     envVars:
       - key: FLASK_ENV
