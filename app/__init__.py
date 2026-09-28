@@ -1,4 +1,5 @@
 import os
+import click
 from flask import Flask, render_template
 from sqlalchemy import event, inspect, text
 from sqlalchemy.engine import Engine
@@ -15,6 +16,8 @@ def create_app(config_name: str = None) -> Flask:
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     config_obj = get_config(config_name)
     app.config.from_object(config_obj)
+
+    register_production_admin_bootstrap(app)
 
     if config_obj.__name__ == "ProductionConfig":
         if not os.environ.get("SECRET_KEY"):
@@ -71,6 +74,60 @@ def create_app(config_name: str = None) -> Flask:
     os.makedirs(upload_folder, exist_ok=True)
 
     return app
+
+
+def register_production_admin_bootstrap(app: Flask):
+    """Register an explicitly invoked command for one-time production setup."""
+    @app.cli.command("bootstrap-production-admin")
+    def bootstrap_production_admin():
+        from app.models.user import Role, User
+
+        username = os.environ.get("BOOTSTRAP_ADMIN_USERNAME", "").strip().lower()
+        full_name = os.environ.get("BOOTSTRAP_ADMIN_NAME", "").strip()
+        password = os.environ.get("BOOTSTRAP_ADMIN_PASSWORD", "")
+        missing = [
+            name
+            for name, value in (
+                ("BOOTSTRAP_ADMIN_USERNAME", username),
+                ("BOOTSTRAP_ADMIN_NAME", full_name),
+                ("BOOTSTRAP_ADMIN_PASSWORD", password),
+            )
+            if not value
+        ]
+        if missing:
+            raise click.ClickException(
+                "Missing required environment variable(s): " + ", ".join(missing)
+            )
+        if len(username) > 80:
+            raise click.ClickException("BOOTSTRAP_ADMIN_USERNAME must be at most 80 characters.")
+        if len(full_name) > 120:
+            raise click.ClickException("BOOTSTRAP_ADMIN_NAME must be at most 120 characters.")
+        if len(password) < 8:
+            raise click.ClickException("BOOTSTRAP_ADMIN_PASSWORD must be at least 8 characters.")
+
+        existing_staff = User.query.filter(User.role.in_(Role.STAFF_ROLES)).first()
+        if existing_staff:
+            click.echo(
+                "Bootstrap skipped: a staff user already exists; no data was changed."
+            )
+            return
+
+        user = User(
+            username=username,
+            full_name=full_name,
+            role=Role.SUPER_ADMIN,
+        )
+        user.set_password(password)
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise click.ClickException(
+                "Bootstrap failed while creating the admin account; no changes were committed."
+            ) from None
+
+        click.echo(f"Production administrator '{username}' created successfully.")
 
 
 def register_sqlite_pragmas(app: Flask):
