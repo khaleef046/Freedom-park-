@@ -176,10 +176,8 @@ def ensure_compatibility_columns(app):
     """Add safe additive columns needed by newer builds to an existing SQLite DB."""
     with app.app_context():
         try:
-            from app.models.expenditure import Expenditure
             from app.models.feedback import Feedback
 
-            Expenditure.__table__.create(bind=db.engine, checkfirst=True)
             inspector = inspect(db.engine)
             if "feedback" in inspector.get_table_names():
                 feedback_columns = {c["name"] for c in inspector.get_columns("feedback")}
