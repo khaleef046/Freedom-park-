@@ -48,6 +48,10 @@ class Booking(db.Model):
                 (db.column("status") == BookingStatus.CONFIRMED) | 
                 (db.column("status") == BookingStatus.PENDING_PAYMENT)
             ),
+            postgresql_where=(
+                (db.column("status") == BookingStatus.CONFIRMED) |
+                (db.column("status") == BookingStatus.PENDING_PAYMENT)
+            ),
         ),
     )
 

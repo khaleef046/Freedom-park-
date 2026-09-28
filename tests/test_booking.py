@@ -2,7 +2,8 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 import pytest
 from sqlalchemy import extract
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql, sqlite
+from sqlalchemy.schema import CreateIndex
 from app.extensions import db
 from app.models.booking import Booking, BookingStatus, BookingSource, BlockedDate
 from app.models.user import Customer, User
@@ -130,6 +131,17 @@ def test_booking_calendar_month_expressions_compile_for_postgresql():
     assert "strftime" not in compiled.lower()
     assert "EXTRACT(year FROM bookings.booking_date)" in compiled
     assert "EXTRACT(month FROM bookings.booking_date)" in compiled
+
+
+def test_active_booking_date_index_is_partial_for_sqlite_and_postgresql():
+    index = next(index for index in Booking.__table__.indexes if index.name == "uq_active_booking_date")
+
+    sqlite_sql = str(CreateIndex(index).compile(dialect=sqlite.dialect()))
+    postgres_sql = str(CreateIndex(index).compile(dialect=postgresql.dialect()))
+
+    assert "WHERE" in sqlite_sql
+    assert "WHERE" in postgres_sql
+    assert "status" in postgres_sql
 
 
 def test_prevent_double_booking_same_date(app):

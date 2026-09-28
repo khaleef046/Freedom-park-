@@ -1,9 +1,11 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
 from sqlalchemy.engine import make_url
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(BASE_DIR / ".env")
 
 class BaseConfig:
     """Base configuration common to all environments."""

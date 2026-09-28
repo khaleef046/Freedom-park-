@@ -34,16 +34,15 @@ bookings and users from being written to Render's ephemeral local filesystem.
 The current local SQLite database is not copied automatically; migrate its data to the
 external PostgreSQL database before accepting real bookings.
 
-The build command is:
+The Blueprint installs dependencies during build. At service start it applies Alembic
+migrations, inserts only missing default settings, and starts Gunicorn on Render's port:
 `pip install -r requirements.txt`
+`python -m flask --app run:app db upgrade && python scripts/prepare_render.py && gunicorn --bind 0.0.0.0:$PORT wsgi:app`
 
-The start command initializes missing database tables and settings, then starts Gunicorn:
-`python scripts/prepare_render.py && gunicorn --bind 0.0.0.0:$PORT "run:app"`
-
-After the first successful deploy, open the Render service Shell and run this once:
-`python seed.py`
-
-This creates the initial staff accounts and sample park settings in PostgreSQL. Sign in with the seeded account, change every seeded password immediately, and remove or replace sample content before accepting real bookings.
+Do not run `python seed.py` against production. It is a development seeder that creates
+accounts with fixed source-controlled passwords and sample content. Provision the first
+production staff account through a separately secured process before relying on protected
+staff/admin workflows; this repository does not yet provide a production-safe bootstrap command.
 
 ## Required production settings
 
@@ -51,6 +50,14 @@ Set these in Render if they are not already provided by the blueprint:
 - `SECRET_KEY`: a long random value.
 - `FLASK_ENV`: `production`.
 - `OTP_MOCK_MODE`: `false`.
+- `GOOGLE_CLIENT_ID`: OAuth 2.0 Client ID from Google Cloud Console.
+- `GOOGLE_CLIENT_SECRET`: OAuth 2.0 Client Secret from Google Cloud Console.
+- `GOOGLE_REDIRECT_URI`: exact HTTPS callback URL for the Render service, ending in `/auth/google/callback`.
+
+For local Google OAuth, set `GOOGLE_REDIRECT_URI` to
+`http://localhost:5000/auth/google/callback`. In Google Cloud Console, register the exact
+local and production callback URLs under **Authorized redirect URIs**. Configure the
+production HTTPS URL after Render assigns the service hostname.
 
 The current OTP implementation is not connected to an SMS provider. For real customer login, add an SMS/WhatsApp provider and configure its credentials as Render secret environment variables.
 

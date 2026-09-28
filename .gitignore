@@ -37,3 +37,6 @@ uploads/
 *.swp
 
 .vercel
+
+.vercel
+.env*

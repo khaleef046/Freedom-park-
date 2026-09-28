@@ -3,8 +3,8 @@ services:
     name: freedom-park-booking
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt && flask --app run:app db upgrade && python scripts/prepare_render.py
-    startCommand: sh -c 'python -m flask --app run:app db upgrade && exec gunicorn wsgi:app'
+    buildCommand: pip install -r requirements.txt
+    startCommand: sh -c 'python -m flask --app run:app db upgrade && python scripts/prepare_render.py && exec gunicorn --bind 0.0.0.0:$PORT wsgi:app'
     healthCheckPath: /
     envVars:
       - key: FLASK_ENV
@@ -14,4 +14,10 @@ services:
       - key: OTP_MOCK_MODE
         value: "false"
       - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
         sync: false
