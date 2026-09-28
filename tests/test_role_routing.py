@@ -90,6 +90,20 @@ def test_staff_management_is_visible_only_to_super_admin(client):
     assert b"Manage staff accounts and access" not in response.data
 
 
+def test_staff_management_add_member_button_has_modal_and_form(client):
+    client.post("/auth/staff-login", data={"username": "test_superadmin", "password": "pass123"})
+
+    response = client.get("/admin/staff")
+
+    assert response.status_code == 200
+    assert b"getElementById('addStaffModal')" in response.data
+    assert b'id="addStaffModal"' in response.data
+    assert b'action="/admin/staff/add"' in response.data
+    assert b'name="csrf_token"' in response.data
+    for field in (b"username", b"full_name", b"phone", b"role", b"password", b"staff_id"):
+        assert b'name="' + field + b'"' in response.data
+
+
 @pytest.mark.parametrize("username", ["test_partner", "test_security"])
 def test_non_admin_roles_cannot_access_finances(client, username):
     client.post("/auth/staff-login", data={"username": username, "password": "pass123"})
